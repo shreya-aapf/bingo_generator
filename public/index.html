@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy-First Bingo Card Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Privacy-First Bingo</h1>
+            <p class="subtitle">Generate secure bingo cards • No data stored • Fully private</p>
+        </header>
+
+        <main>
+            <!-- Card Generation Section -->
+            <section class="card-section">
+                <div class="controls">
+                    <button id="generateCard" class="btn btn-primary">🎲 Generate New Card</button>
+                    <div class="card-info">
+                        <span id="cardId">Card ID: Not generated</span>
+                        <span id="cardProof">Proof: Pending...</span>
+                    </div>
+                </div>
+
+                <!-- Bingo Card Display -->
+                <div id="bingoCard" class="bingo-card hidden">
+                    <div class="card-header">
+                        <h2>B I N G O</h2>
+                    </div>
+                    <div class="card-grid" id="cardGrid">
+                        <!-- Grid cells will be populated by JavaScript -->
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-details">
+                            <span class="cid" id="displayCid"></span>
+                            <span class="proof" id="displayProof"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Actions Section -->
+            <section class="actions-section hidden" id="actionsSection">
+                <div class="action-grid">
+                    <!-- Email Card -->
+                    <div class="action-card">
+                        <h3>📧 Email My Card</h3>
+                        <p class="privacy-note">🔒 Your info is NOT stored - only used for this email</p>
+                        <form id="emailForm">
+                            <div class="form-group">
+                                <label for="userName">Name:</label>
+                                <input type="text" id="userName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="userEmail">Email:</label>
+                                <input type="email" id="userEmail" required>
+                            </div>
+                            <button type="submit" class="btn btn-secondary">📧 Send Card</button>
+                        </form>
+                    </div>
+
+                    <!-- Download Card -->
+                    <div class="action-card">
+                        <h3>💾 Download Card</h3>
+                        <p>Save your card locally</p>
+                        <div class="download-options">
+                            <button id="downloadPng" class="btn btn-secondary">📸 Download PNG</button>
+                            <button id="downloadPdf" class="btn btn-secondary">📄 Download PDF</button>
+                        </div>
+                    </div>
+
+                    <!-- Claim Prize -->
+                    <div class="action-card">
+                        <h3>🏆 Claim Prize</h3>
+                        <p>Submit your winning card</p>
+                        <form id="claimForm">
+                            <div class="form-group">
+                                <label for="claimName">Name:</label>
+                                <input type="text" id="claimName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="claimEmail">Email:</label>
+                                <input type="email" id="claimEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mark your winning squares:</label>
+                                <div class="marking-instructions">
+                                    Click squares on your card above to mark them
+                                </div>
+                                <div id="markedSquares"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="claimAttachment">Attachment (optional):</label>
+                                <input type="file" id="claimAttachment" accept="image/*,application/pdf">
+                            </div>
+                            <button type="submit" class="btn btn-primary">🏆 Submit Claim</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Messages -->
+            <div id="statusMessages" class="status-messages"></div>
+        </main>
+
+        <footer>
+            <p>🛡️ Privacy-first design • No user data stored • Open source</p>
+            <p class="tech-note">Built with Supabase Edge Functions • Fully serverless</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

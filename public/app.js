@@ -84,8 +84,9 @@ class BingoCardGenerator {
             document.getElementById('cardId').textContent = `Card ID: ${cid}`;
             document.getElementById('cardProof').textContent = `Proof: ${proof}`;
             
-            // Show action section
+            // Show action sections
             document.getElementById('actionsSection').classList.remove('hidden');
+            document.getElementById('claimSection').classList.remove('hidden');
             
             this.showStatus(`Card ${cid} generated successfully!`, 'success');
             

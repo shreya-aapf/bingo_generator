@@ -40,8 +40,8 @@
     --shadow-color: 6px 6px 0px var(--aa-plum);
 }
 
-/* Import Google Fonts for punk rock aesthetic + block serif font */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&family=Oswald:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Rockwell:wght@400;700&family=Bitter:wght@400;700;900&family=Roboto+Slab:wght@400;700;900&family=Playfair+Display:wght@400;700;900&display=swap');
+/* Import Google Fonts for punk rock aesthetic + Noto Serif for heading */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&family=Oswald:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700;800;900&display=swap');
 
 body {
     font-family: 'Barlow Condensed', 'Bebas Neue', 'Oswald', 'Arial Black', sans-serif;
@@ -58,13 +58,15 @@ body {
 }
 
 .container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 1rem;
+    width: 100%;
+    max-width: 100vw;
+    margin: 0;
+    padding: 1rem 2rem;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    box-sizing: border-box;
 }
 
 header {
@@ -78,7 +80,7 @@ header {
 }
 
 header h1 {
-    font-family: 'Bitter', 'Roboto Slab', 'Rockwell', 'Times New Roman', 'Georgia', serif;
+    font-family: 'Noto Serif', 'Times New Roman', 'Georgia', serif;
     font-size: 4.5rem;
     font-weight: 900;
     margin-bottom: 0;
@@ -86,16 +88,17 @@ header h1 {
     text-shadow: 4px 4px 0px var(--secondary-color), 2px 2px 0px #000000;
     letter-spacing: 0.1em;
     transform: none;
-    /* Block serif styling */
+    /* Block serif styling with Noto Serif */
     text-transform: uppercase;
+    white-space: nowrap;
     background: linear-gradient(45deg, var(--primary-color) 0%, #ff7b3d 50%, var(--primary-color) 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     /* Fallback for browsers that don't support background-clip */
     filter: drop-shadow(4px 4px 0px var(--secondary-color)) drop-shadow(2px 2px 0px #000000);
-    /* Add block letter styling */
-    -webkit-text-stroke: 1px var(--border);
+    /* White outline for better contrast */
+    -webkit-text-stroke: 2px var(--surface);
 }
 
 /* Remove subtitle styles since we're removing the tagline */
@@ -103,16 +106,36 @@ header h1 {
 main {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 2rem;
     align-items: start;
+    width: 100%;
+    max-width: none;
+}
+
+/* Tablet: stack to two columns */
+@media (max-width: 1200px) {
+    main {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .claim-section {
+        grid-column: 1 / -1;
+        margin-top: 1rem;
+    }
 }
 
 /* Mobile: stack vertically */
-@media (max-width: 968px) {
+@media (max-width: 768px) {
     main {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+    
+    .claim-section {
+        grid-column: 1;
+        margin-top: 0;
     }
 }
 
@@ -324,19 +347,38 @@ main {
     color: var(--text-muted);
 }
 
-/* Actions Section - Right Side */
+/* Actions Section - Middle Column */
 .actions-section {
     background: var(--surface);
     padding: 1.5rem;
     box-shadow: var(--shadow);
     border: 4px solid var(--border);
-    transform: rotate(-0.5deg);
+    transform: rotate(-0.7deg);
     grid-column: 2;
 }
 
+/* Claim Prize Section - Right Column */
+.claim-section {
+    background: var(--surface);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 4px solid var(--border);
+    transform: rotate(0.3deg);
+    grid-column: 3;
+}
+
+.claim-card {
+    margin-bottom: 0;
+    border: none;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
 .action-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 
@@ -354,9 +396,14 @@ main {
     box-shadow: 4px 4px 0px var(--primary-color);
 }
 
-.action-card:nth-child(3) {
-    transform: rotate(1deg);
-    box-shadow: 4px 4px 0px var(--accent-color);
+/* Special styling for claim card in third column */
+.claim-section .claim-card {
+    padding: 1.2rem;
+    border: 3px solid var(--border);
+    background: var(--surface);
+    box-shadow: 4px 4px 0px var(--aa-gold);
+    transform: rotate(0.8deg);
+    margin-bottom: 0;
 }
 
 .action-card h3 {
@@ -590,8 +637,13 @@ footer {
         padding: 1rem;
     }
     
+    main {
+        gap: 1rem;
+    }
+    
     header h1 {
-        font-size: 2rem;
+        font-size: 2.5rem;
+        letter-spacing: 0.05em;
     }
     
     .controls {
@@ -628,8 +680,13 @@ footer {
 }
 
 @media (max-width: 480px) {
+    .container {
+        padding: 0.5rem;
+    }
+    
     .card-section,
-    .actions-section {
+    .actions-section,
+    .claim-section {
         padding: 1rem;
     }
     
@@ -639,12 +696,23 @@ footer {
     }
     
     .grid-cell {
-        font-size: 1rem;
+        font-size: 0.9rem;
+        padding: 0.3rem;
     }
     
     .card-header h2 {
         font-size: 1.5rem;
         letter-spacing: 0.25rem;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+        letter-spacing: 0.05em;
+        -webkit-text-stroke: 1px var(--surface);
+    }
+    
+    main {
+        gap: 0.5rem;
     }
 }
 

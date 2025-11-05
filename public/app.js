@@ -7,6 +7,7 @@ class BingoCardGenerator {
         this.markedSquares = new Set();
         // UPDATE THIS: Use your Supabase project URL
         this.supabaseUrl = 'https://jnsfslmcowcefhpszrfx.supabase.co'; // Your Supabase project URL
+        this.sessionId = this.generateSessionId();
         this.init();
     }
 
@@ -67,6 +68,12 @@ class BingoCardGenerator {
                 proof
             };
 
+            // Store user-card mapping (don't await to avoid blocking UI)
+            this.storeUserCardMapping(cid).catch(error => {
+                console.warn('Failed to store user-card mapping:', error);
+                // Don't show error to user as this is background functionality
+            });
+
             // Reset marked squares
             this.markedSquares.clear();
             
@@ -86,6 +93,15 @@ class BingoCardGenerator {
             console.error('Error generating card:', error);
             this.showStatus('Failed to generate card. Please try again.', 'error');
         }
+    }
+
+    /**
+     * Generate a unique session ID for tracking
+     */
+    generateSessionId() {
+        const timestamp = Date.now().toString(36);
+        const randomPart = Math.random().toString(36).substr(2, 9);
+        return `sess_${timestamp}_${randomPart}`;
     }
 
     /**
@@ -401,6 +417,9 @@ class BingoCardGenerator {
         try {
             this.showStatus('Deploying email automation...', 'info');
 
+            // Update user-card mapping with email info (background operation)
+            this.storeUserCardMapping(this.currentCard.cid, name, email).catch(console.warn);
+
             // Generate card image
             const cardImage = await this.generateCardImage();
 
@@ -608,6 +627,39 @@ class BingoCardGenerator {
             reader.onload = () => resolve(reader.result);
             reader.onerror = error => reject(error);
         });
+    }
+
+    /**
+     * Store user-card mapping in Supabase
+     */
+    async storeUserCardMapping(cid, userName = null, userEmail = null) {
+        try {
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/store-user-card`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cid,
+                    name: userName,
+                    email: userEmail,
+                    session_id: this.sessionId,
+                    user_agent: navigator.userAgent
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('User-card mapping stored:', result.mapping_id);
+            return result;
+
+        } catch (error) {
+            console.error('Error storing user-card mapping:', error);
+            throw error;
+        }
     }
 
     /**

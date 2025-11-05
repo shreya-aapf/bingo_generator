@@ -40,8 +40,8 @@
     --shadow-color: 6px 6px 0px var(--aa-plum);
 }
 
-/* Import Google Fonts for punk rock aesthetic */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&family=Oswald:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700;800;900&display=swap');
+/* Import Google Fonts for punk rock aesthetic + block serif font */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&family=Oswald:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Rockwell:wght@400;700&family=Bitter:wght@400;700;900&family=Roboto+Slab:wght@400;700;900&family=Playfair+Display:wght@400;700;900&display=swap');
 
 body {
     font-family: 'Barlow Condensed', 'Bebas Neue', 'Oswald', 'Arial Black', sans-serif;
@@ -78,24 +78,27 @@ header {
 }
 
 header h1 {
-    font-family: 'Bebas Neue', 'Oswald', sans-serif;
-    font-size: 3.5rem;
-    font-weight: 400;
-    margin-bottom: 0.5rem;
+    font-family: 'Bitter', 'Roboto Slab', 'Rockwell', 'Times New Roman', 'Georgia', serif;
+    font-size: 4.5rem;
+    font-weight: 900;
+    margin-bottom: 0;
     color: var(--primary-color);
-    text-shadow: 3px 3px 0px var(--secondary-color);
-    letter-spacing: 0.15em;
-    transform: skew(-2deg);
+    text-shadow: 4px 4px 0px var(--secondary-color), 2px 2px 0px #000000;
+    letter-spacing: 0.1em;
+    transform: none;
+    /* Block serif styling */
+    text-transform: uppercase;
+    background: linear-gradient(45deg, var(--primary-color) 0%, #ff7b3d 50%, var(--primary-color) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Fallback for browsers that don't support background-clip */
+    filter: drop-shadow(4px 4px 0px var(--secondary-color)) drop-shadow(2px 2px 0px #000000);
+    /* Add block letter styling */
+    -webkit-text-stroke: 1px var(--border);
 }
 
-.subtitle {
-    color: var(--text);
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-family: 'Oswald', sans-serif;
-}
+/* Remove subtitle styles since we're removing the tagline */
 
 main {
     flex: 1;

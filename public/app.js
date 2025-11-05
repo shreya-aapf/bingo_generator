@@ -131,22 +131,22 @@ class BingoCardGenerator {
     }
 
     /**
-     * Generate deterministic bingo card numbers based on seed
+     * Generate deterministic bingo card content based on seed
      */
     generateCardNumbers(seed) {
         // Use seed to create reproducible random sequence
         let random = this.seededRandom(parseInt(seed));
         
         const columns = {
-            B: this.generateColumnNumbers(1, 15, random),
-            I: this.generateColumnNumbers(16, 30, random),
-            N: this.generateColumnNumbers(31, 45, random),
-            G: this.generateColumnNumbers(46, 60, random),
-            O: this.generateColumnNumbers(61, 75, random)
+            B: this.generateColumnContent('B', random),
+            I: this.generateColumnContent('I', random),
+            N: this.generateColumnContent('N', random),
+            G: this.generateColumnContent('G', random),
+            O: this.generateColumnContent('O', random)
         };
         
-        // Set center as FREE space
-        columns.N[2] = 'FREE';
+        // Set center as easy FREE space
+        columns.N[2] = 'Sign up for\nPF Summit';
         
         return columns;
     }
@@ -162,24 +162,114 @@ class BingoCardGenerator {
     }
 
     /**
-     * Generate 5 unique numbers for a column within range
+     * Generate 5 unique content items for a column
      */
-    generateColumnNumbers(min, max, random) {
-        const numbers = [];
-        const available = [];
+    generateColumnContent(columnLetter, random) {
+        const content = [];
+        const available = [...this.getContentPool(columnLetter)];
         
-        // Create pool of available numbers
-        for (let i = min; i <= max; i++) {
-            available.push(i);
-        }
-        
-        // Select 5 random numbers
+        // Select 5 random content items
         for (let i = 0; i < 5; i++) {
             const index = Math.floor(random() * available.length);
-            numbers.push(available.splice(index, 1)[0]);
+            content.push(available.splice(index, 1)[0]);
         }
         
-        return numbers;
+        return content;
+    }
+
+    /**
+     * Get content pool for each BINGO column
+     */
+    getContentPool(columnLetter) {
+        const pools = {
+            B: [
+                'Book a demo',
+                'Browse Bot Store',
+                'Build your first bot',
+                'Backup your work',
+                'Bookmark a session',
+                'Badge collection started',
+                'Brainstorm with AI',
+                'Beta feature tested',
+                'Business case created',
+                'Breakout room joined',
+                'Best practice noted',
+                'Benchmark set',
+                'Bot deployed',
+                'Blueprint downloaded',
+                'Buzz word counted'
+            ],
+            I: [
+                'Install AA Desktop',
+                'Integrate with API',
+                'Import a package',
+                'Identify use case',
+                'Innovate workflow',
+                'Inspect bot logs',
+                'Implement security',
+                'Invite team member',
+                'Iterate on design',
+                'Improve process',
+                'Index documents',
+                'Initiate automation',
+                'Issue resolved',
+                'Interact with expert',
+                'Increase efficiency'
+            ],
+            N: [
+                'Network with peers',
+                'Navigate Control Room',
+                'New skill learned',
+                'Note key insight',
+                'Next step planned',
+                'Notify stakeholder',
+                'Nuance understood',
+                'Navigate roadmap',
+                'Negotiate timeline',
+                'Nurture partnership',
+                'No-code solution',
+                'Naming convention',
+                'Notification setup',
+                'Nested logic used',
+                'News feature found'
+            ],
+            G: [
+                'Get certified',
+                'Generate report',
+                'Governance reviewed',
+                'Goal achieved',
+                'Group collaboration',
+                'Get hands-on demo',
+                'Gather requirements',
+                'GitHub integration',
+                'Global deployment',
+                'Growth strategy',
+                'GUI automation',
+                'Guide team member',
+                'Gamification added',
+                'Gap analysis done',
+                'Green light received'
+            ],
+            O: [
+                'Optimize performance',
+                'Orchestrate workflow',
+                'Onboard new user',
+                'Overcome challenge',
+                'Organize repository',
+                'Operate bot fleet',
+                'Outline strategy',
+                'Observe best practice',
+                'Obtain approval',
+                'Offer feedback',
+                'OpenAI connected',
+                'Office automation',
+                'Output validated',
+                'Opportunity identified',
+                'Outcome measured'
+            ]
+        };
+        
+        return pools[columnLetter] || [];
     }
 
     /**
@@ -233,7 +323,13 @@ class BingoCardGenerator {
                 cell.dataset.col = col;
                 
                 const value = this.currentCard.numbers[columns[col]][row];
-                cell.textContent = value;
+                // Handle multi-line text
+                if (value.includes('\n')) {
+                    const lines = value.split('\n');
+                    cell.innerHTML = lines.map(line => `<div>${line}</div>`).join('');
+                } else {
+                    cell.textContent = value;
+                }
                 
                 // Mark FREE space
                 if (value === 'FREE') {
@@ -523,14 +619,31 @@ class BingoCardGenerator {
         messageEl.className = `status-message ${type}`;
         messageEl.textContent = message;
         
+        // Add click to dismiss functionality
+        messageEl.addEventListener('click', () => {
+            this.dismissMessage(messageEl);
+        });
+        
         container.appendChild(messageEl);
         
-        // Auto-remove after 5 seconds
+        // Auto-remove after 3 seconds (reduced from 5)
         setTimeout(() => {
-            if (messageEl.parentNode) {
-                messageEl.parentNode.removeChild(messageEl);
-            }
-        }, 5000);
+            this.dismissMessage(messageEl);
+        }, 3000);
+    }
+
+    /**
+     * Dismiss status message with animation
+     */
+    dismissMessage(messageEl) {
+        if (messageEl.parentNode) {
+            messageEl.style.animation = 'slideUp 0.3s ease forwards';
+            setTimeout(() => {
+                if (messageEl.parentNode) {
+                    messageEl.parentNode.removeChild(messageEl);
+                }
+            }, 300);
+        }
     }
 }
 

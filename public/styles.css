@@ -7,71 +7,120 @@
 }
 
 :root {
-    --primary-color: #2563eb;
-    --secondary-color: #64748b;
-    --success-color: #059669;
-    --warning-color: #d97706;
-    --error-color: #dc2626;
-    --background: #f8fafc;
-    --surface: #ffffff;
-    --border: #e2e8f0;
-    --text: #0f172a;
-    --text-muted: #64748b;
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    /* Punk Rock AA Brand Color Palette */
+    --aa-orange: #FF5A10; /* AA Orange */
+    --aa-plum: #662D8F; /* New Plum */
+    --aa-gold: #FFBC03; /* AA Gold */
+    
+    /* Main colors */
+    --primary-color: var(--aa-orange);
+    --secondary-color: var(--aa-plum);
+    --accent-color: var(--aa-gold);
+    --success-color: #2D8F47; /* Muted green */
+    --warning-color: var(--aa-gold);
+    --error-color: #D63031; /* Muted red */
+    
+    /* Backgrounds and surfaces */
+    --background: #1a1a1a; /* Dark gray instead of pure black */
+    --surface: #f8f8f8; /* Off-white */
+    --surface-dark: #2d2d2d; /* Dark surface */
+    --border: #000000; /* Black borders */
+    --text: #000000; /* Black text */
+    --text-light: #f8f8f8; /* Light text */
+    --text-muted: #666666; /* Gray text */
+    
+    /* Vintage ticket colors */
+    --ticket-bg: #f4f1e8; /* Aged paper */
+    --ticket-border: var(--aa-plum); /* Use plum for borders */
+    --ticket-accent: var(--aa-orange); /* Use AA orange */
+    
+    /* Muted shadows for punk aesthetic */
+    --shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
+    --shadow-lg: 8px 8px 0px rgba(0, 0, 0, 0.8);
+    --shadow-color: 6px 6px 0px var(--aa-plum);
 }
 
+/* Import Google Fonts for punk rock aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&family=Oswald:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700;800;900&display=swap');
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Barlow Condensed', 'Bebas Neue', 'Oswald', 'Arial Black', sans-serif;
+    font-weight: 600;
     background: var(--background);
-    color: var(--text);
-    line-height: 1.6;
+    color: var(--text-light);
+    line-height: 1.4;
     min-height: 100vh;
+    /* Subtle punk rock pattern */
+    background-image: 
+        linear-gradient(45deg, transparent 48%, rgba(255, 90, 16, 0.1) 50%, transparent 52%),
+        linear-gradient(-45deg, transparent 48%, rgba(102, 45, 143, 0.1) 50%, transparent 52%);
+    background-size: 30px 30px;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 1rem;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    gap: 1rem;
 }
 
 header {
     text-align: center;
-    margin-bottom: 3rem;
+    background: var(--surface);
+    border: 4px solid var(--border);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-color);
+    transform: rotate(-0.5deg);
+    margin-bottom: 1rem;
 }
 
 header h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
+    font-family: 'Bebas Neue', 'Oswald', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 400;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--success-color));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--primary-color);
+    text-shadow: 3px 3px 0px var(--secondary-color);
+    letter-spacing: 0.15em;
+    transform: skew(-2deg);
 }
 
 .subtitle {
-    color: var(--text-muted);
+    color: var(--text);
     font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'Oswald', sans-serif;
 }
 
 main {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
 }
 
-/* Card Generation Section */
+/* Mobile: stack vertically */
+@media (max-width: 968px) {
+    main {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Card Generation Section - Left Side */
 .card-section {
     background: var(--surface);
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
+    border: 4px solid var(--border);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-color);
+    transform: rotate(0.5deg);
+    grid-column: 1;
 }
 
 .controls {
@@ -79,7 +128,7 @@ main {
     flex-wrap: wrap;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .card-info {
@@ -91,34 +140,93 @@ main {
     color: var(--text-muted);
 }
 
-/* Bingo Card Styles */
+/* Vintage Ticket Bingo Card Styles */
 .bingo-card {
     max-width: 500px;
-    margin: 2rem auto;
-    background: var(--surface);
-    border-radius: 1rem;
+    margin: 1rem auto;
+    background: var(--ticket-bg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
-    border: 2px solid var(--primary-color);
-    transition: transform 0.2s ease;
+    border: 6px solid var(--ticket-border);
+    position: relative;
+    transform: rotate(-0.5deg);
+    /* Vintage ticket texture */
+    background-image: 
+        linear-gradient(45deg, transparent 40%, rgba(139, 69, 19, 0.1) 50%, transparent 60%),
+        radial-gradient(circle at 10% 20%, rgba(139, 69, 19, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 69, 19, 0.05) 0%, transparent 50%);
+}
+
+/* Perforated edges effect */
+.bingo-card::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 15px;
+    right: 15px;
+    height: 6px;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 8px,
+        var(--ticket-border) 8px,
+        var(--ticket-border) 12px
+    );
+    border-radius: 3px;
+}
+
+.bingo-card::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 15px;
+    right: 15px;
+    height: 6px;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 8px,
+        var(--ticket-border) 8px,
+        var(--ticket-border) 12px
+    );
+    border-radius: 3px;
 }
 
 .bingo-card:hover {
-    transform: translateY(-2px);
+    transform: rotate(-0.5deg) scale(1.02);
+    transition: transform 0.2s ease;
 }
 
 .card-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--success-color));
-    color: white;
+    background: var(--ticket-accent);
+    color: var(--surface);
     padding: 1rem;
     text-align: center;
+    border-bottom: 4px dashed var(--ticket-border);
+    position: relative;
+}
+
+/* Vintage stamp effect */
+.card-header::before {
+    content: 'ADMIT ONE';
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--ticket-border);
+    opacity: 0.8;
+    transform: rotate(15deg);
+    font-family: 'Oswald', sans-serif;
 }
 
 .card-header h2 {
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: 0.5rem;
-    margin-left: 0.25rem; /* Adjust for letter spacing */
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 400;
+    letter-spacing: 0.4rem;
+    margin-left: 0.2rem;
+    text-shadow: 2px 2px 0px var(--ticket-border);
 }
 
 .card-grid {
@@ -128,46 +236,80 @@ main {
 }
 
 .grid-cell {
-    aspect-ratio: 1;
+    min-height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    font-size: 1.2rem;
-    border: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    border: 2px solid var(--ticket-border);
     background: var(--surface);
+    color: var(--text); /* Fix: explicitly set text color */
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
     position: relative;
+    font-family: 'Barlow Condensed', sans-serif;
+    padding: 0.5rem;
+    text-align: center;
+    word-wrap: break-word;
+    hyphens: auto;
 }
 
 .grid-cell:hover {
-    background: #f1f5f9;
+    background: var(--accent-color);
+    transform: scale(0.98);
+    box-shadow: inset 2px 2px 0px var(--ticket-border);
 }
 
 .grid-cell.marked {
-    background: linear-gradient(135deg, var(--success-color), #10b981);
-    color: white;
+    background: var(--success-color);
+    color: var(--surface);
+    box-shadow: inset 3px 3px 0px var(--ticket-border);
+    transform: scale(0.95);
 }
 
 .grid-cell.marked::after {
-    content: '✓';
+    content: '★';
     position: absolute;
-    top: 4px;
+    top: 2px;
     right: 4px;
-    font-size: 0.875rem;
+    font-size: 1rem;
+    color: var(--error-color);
+    text-shadow: 2px 2px 0px var(--surface);
 }
 
 .grid-cell.free {
-    background: linear-gradient(135deg, var(--warning-color), #f59e0b);
-    color: white;
-    font-size: 1rem;
+    background: var(--secondary-color);
+    color: var(--surface);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+    animation: subtlePulse 3s infinite;
+}
+
+@keyframes subtlePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 0.9; }
 }
 
 .card-footer {
-    padding: 1rem;
-    background: #f8fafc;
-    border-top: 1px solid var(--border);
+    padding: 0.75rem;
+    background: var(--ticket-bg);
+    border-top: 4px dashed var(--ticket-border);
+    position: relative;
+}
+
+/* Ticket stub effect */
+.card-footer::after {
+    content: 'KEEP THIS PORTION';
+    position: absolute;
+    bottom: 2px;
+    right: 10px;
+    font-size: 0.5rem;
+    font-weight: 900;
+    color: var(--ticket-border);
+    opacity: 0.6;
 }
 
 .card-details {
@@ -179,31 +321,49 @@ main {
     color: var(--text-muted);
 }
 
-/* Actions Section */
+/* Actions Section - Right Side */
 .actions-section {
     background: var(--surface);
-    border-radius: 1rem;
-    padding: 2rem;
+    padding: 1.5rem;
     box-shadow: var(--shadow);
-    border: 1px solid var(--border);
+    border: 4px solid var(--border);
+    transform: rotate(-0.5deg);
+    grid-column: 2;
 }
 
 .action-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
 }
 
 .action-card {
-    padding: 1.5rem;
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
+    padding: 1.2rem;
+    border: 3px solid var(--border);
     background: var(--surface);
+    box-shadow: 4px 4px 0px var(--secondary-color);
+    transform: rotate(0.5deg);
+    margin-bottom: 1rem;
+}
+
+.action-card:nth-child(2) {
+    transform: rotate(-0.5deg);
+    box-shadow: 4px 4px 0px var(--primary-color);
+}
+
+.action-card:nth-child(3) {
+    transform: rotate(1deg);
+    box-shadow: 4px 4px 0px var(--accent-color);
 }
 
 .action-card h3 {
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
+    margin-bottom: 0.7rem;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'Oswald', sans-serif;
 }
 
 .privacy-note {
@@ -213,7 +373,7 @@ main {
     margin-bottom: 1rem;
 }
 
-/* Form Styles */
+/* Punk Rock Form Styles */
 .form-group {
     margin-bottom: 1rem;
 }
@@ -221,19 +381,25 @@ main {
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    font-weight: 500;
+    font-weight: 700;
     color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.9rem;
+    font-family: 'Oswald', sans-serif;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
+    padding: 0.8rem;
+    border: 3px solid var(--border);
     font-size: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-weight: 500;
+    background: var(--surface);
+    transition: all 0.1s ease;
+    font-family: 'Barlow Condensed', sans-serif;
 }
 
 .form-group input:focus,
@@ -241,44 +407,59 @@ main {
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    box-shadow: 3px 3px 0px var(--primary-color);
+    transform: translate(-1px, -1px);
 }
 
-/* Button Styles */
+/* Punk Rock Button Styles */
 .btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    font-weight: 500;
+    padding: 0.8rem 1.2rem;
+    border: 3px solid var(--border);
+    font-size: 0.95rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
     text-decoration: none;
-    border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: 'Barlow Condensed', sans-serif;
 }
 
 .btn-primary {
     background: var(--primary-color);
-    color: white;
+    color: var(--surface);
+    box-shadow: 3px 3px 0px var(--border);
 }
 
 .btn-primary:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
+    background: var(--secondary-color);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px var(--border);
+}
+
+.btn-primary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px var(--border);
 }
 
 .btn-secondary {
     background: var(--surface);
-    color: var(--secondary-color);
-    border-color: var(--border);
+    color: var(--text);
+    box-shadow: 3px 3px 0px var(--secondary-color);
 }
 
 .btn-secondary:hover {
-    background: #f1f5f9;
-    border-color: var(--secondary-color);
+    background: var(--accent-color);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px var(--secondary-color);
+}
+
+.btn-secondary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px var(--secondary-color);
 }
 
 .btn:disabled {
@@ -299,49 +480,71 @@ main {
     margin-bottom: 0.5rem;
 }
 
-/* Status Messages */
+/* Top Status Messages */
 .status-messages {
     position: fixed;
-    top: 2rem;
-    right: 2rem;
-    z-index: 1000;
-    max-width: 400px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    max-width: 600px;
+    width: 90%;
+    pointer-events: none; /* Allow clicks through container */
 }
 
 .status-message {
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     margin-bottom: 0.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    animation: slideIn 0.3s ease;
+    font-weight: 700;
+    animation: slideDown 0.3s ease;
+    border: 3px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.9rem;
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    pointer-events: auto; /* Allow interactions with individual messages */
+    cursor: pointer;
+    position: relative;
 }
 
 .status-message.success {
-    background: #d1fae5;
-    border: 1px solid #a7f3d0;
-    color: var(--success-color);
+    background: var(--success-color);
+    color: var(--surface);
+    box-shadow: 6px 6px 0px var(--border);
 }
 
 .status-message.error {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-    color: var(--error-color);
+    background: var(--error-color);
+    color: var(--surface);
+    box-shadow: 6px 6px 0px var(--border);
 }
 
 .status-message.info {
-    background: #dbeafe;
-    border: 1px solid #bfdbfe;
-    color: var(--primary-color);
+    background: var(--primary-color);
+    color: var(--surface);
+    box-shadow: 6px 6px 0px var(--border);
 }
 
-@keyframes slideIn {
-    from {
+@keyframes slideDown {
+    0% {
         opacity: 0;
-        transform: translateX(100%);
+        transform: translateY(-100px) scale(0.9);
     }
-    to {
+    100% {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
     }
 }
 
@@ -358,11 +561,19 @@ main {
 /* Footer */
 footer {
     text-align: center;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 3px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
     font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    box-shadow: var(--shadow);
+    transform: rotate(0.3deg);
+    grid-column: 1 / -1;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.05em;
 }
 
 .tech-note {
@@ -398,9 +609,12 @@ footer {
     }
     
     .status-messages {
-        position: static;
-        max-width: none;
-        margin-top: 1rem;
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 95%;
+        width: auto;
     }
     
     .card-details {

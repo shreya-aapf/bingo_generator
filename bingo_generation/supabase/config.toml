@@ -1,0 +1,56 @@
+# Supabase Configuration for Privacy-First Bingo Card App
+
+# UPDATE THIS: Replace with your actual Supabase project ID
+project_id = "jnsfslmcowcefhpszrfx"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[auth]
+enabled = true
+port = 54324
+external_url = "http://localhost:54324"
+jwt_expiry = 3600
+refresh_token_rotation_enabled = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_signins = false
+minimum_password_length = 6
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[realtime]
+enabled = true
+port = 54323
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[functions]
+verify_jwt = false
+
+[functions.generate-proof]
+verify_jwt = false
+
+[functions.send-card]
+verify_jwt = false
+
+[functions.claim]
+verify_jwt = false

@@ -1,0 +1,551 @@
+// Privacy-First Bingo Card Generator
+// Frontend Application Logic
+
+class BingoCardGenerator {
+    constructor() {
+        this.currentCard = null;
+        this.markedSquares = new Set();
+        // UPDATE THIS: Use your Supabase project URL
+        this.supabaseUrl = 'https://jnsfslmcowcefhpszrfx.supabase.co'; // Your Supabase project URL
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.showStatus('Ready to generate your first bingo card!', 'info');
+    }
+
+    bindEvents() {
+        // Card generation
+        document.getElementById('generateCard').addEventListener('click', () => {
+            this.generateNewCard();
+        });
+
+        // Email form
+        document.getElementById('emailForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.emailCard();
+        });
+
+        // Download buttons
+        document.getElementById('downloadPng').addEventListener('click', () => {
+            this.downloadCard('png');
+        });
+        document.getElementById('downloadPdf').addEventListener('click', () => {
+            this.downloadCard('pdf');
+        });
+
+        // Claim form
+        document.getElementById('claimForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.submitClaim();
+        });
+    }
+
+    /**
+     * Generate a deterministic bingo card based on CID
+     */
+    async generateNewCard() {
+        try {
+            this.showStatus('Generating new bingo card...', 'info');
+            
+            // Generate random seed for CID
+            const seed = this.generateSeed();
+            const cid = this.generateCID(seed);
+            
+            // Generate card numbers deterministically
+            const cardNumbers = this.generateCardNumbers(seed);
+            
+            // Get proof from Edge Function
+            const proof = await this.getCardProof(cid);
+            
+            // Create card object
+            this.currentCard = {
+                cid,
+                seed,
+                numbers: cardNumbers,
+                proof
+            };
+
+            // Reset marked squares
+            this.markedSquares.clear();
+            
+            // Render the card
+            this.renderCard();
+            
+            // Update UI
+            document.getElementById('cardId').textContent = `Card ID: ${cid}`;
+            document.getElementById('cardProof').textContent = `Proof: ${proof}`;
+            
+            // Show action section
+            document.getElementById('actionsSection').classList.remove('hidden');
+            
+            this.showStatus(`Card ${cid} generated successfully!`, 'success');
+            
+        } catch (error) {
+            console.error('Error generating card:', error);
+            this.showStatus('Failed to generate card. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * Generate a random seed for card generation
+     */
+    generateSeed() {
+        return Math.floor(Math.random() * 1000000000).toString();
+    }
+
+    /**
+     * Generate CID from seed using base32(sha256("BINGO" + seed))[:12]
+     */
+    generateCID(seed) {
+        const message = "BINGO" + seed;
+        const hash = CryptoJS.SHA256(message);
+        const base32 = this.toBase32(hash.toString());
+        return base32.substring(0, 12).toUpperCase();
+    }
+
+    /**
+     * Convert hex string to base32
+     */
+    toBase32(hex) {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        let binary = '';
+        
+        // Convert hex to binary
+        for (let i = 0; i < hex.length; i += 2) {
+            const hexPair = hex.substr(i, 2);
+            const decimal = parseInt(hexPair, 16);
+            binary += decimal.toString(2).padStart(8, '0');
+        }
+        
+        // Convert binary to base32
+        let base32 = '';
+        for (let i = 0; i < binary.length; i += 5) {
+            const chunk = binary.substr(i, 5).padEnd(5, '0');
+            const index = parseInt(chunk, 2);
+            base32 += alphabet[index];
+        }
+        
+        return base32;
+    }
+
+    /**
+     * Generate deterministic bingo card numbers based on seed
+     */
+    generateCardNumbers(seed) {
+        // Use seed to create reproducible random sequence
+        let random = this.seededRandom(parseInt(seed));
+        
+        const columns = {
+            B: this.generateColumnNumbers(1, 15, random),
+            I: this.generateColumnNumbers(16, 30, random),
+            N: this.generateColumnNumbers(31, 45, random),
+            G: this.generateColumnNumbers(46, 60, random),
+            O: this.generateColumnNumbers(61, 75, random)
+        };
+        
+        // Set center as FREE space
+        columns.N[2] = 'FREE';
+        
+        return columns;
+    }
+
+    /**
+     * Seeded random number generator
+     */
+    seededRandom(seed) {
+        return function() {
+            seed = (seed * 16807) % 2147483647;
+            return (seed - 1) / 2147483646;
+        };
+    }
+
+    /**
+     * Generate 5 unique numbers for a column within range
+     */
+    generateColumnNumbers(min, max, random) {
+        const numbers = [];
+        const available = [];
+        
+        // Create pool of available numbers
+        for (let i = min; i <= max; i++) {
+            available.push(i);
+        }
+        
+        // Select 5 random numbers
+        for (let i = 0; i < 5; i++) {
+            const index = Math.floor(random() * available.length);
+            numbers.push(available.splice(index, 1)[0]);
+        }
+        
+        return numbers;
+    }
+
+    /**
+     * Get card proof from Supabase Edge Function
+     */
+    async getCardProof(cid) {
+        try {
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/generate-proof`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cid })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.proof;
+            
+        } catch (error) {
+            console.error('Error getting proof:', error);
+            // Fallback for development - generate a mock proof
+            return 'DEV-PROOF-' + cid.substring(0, 6);
+        }
+    }
+
+    /**
+     * Render the bingo card in the DOM
+     */
+    renderCard() {
+        if (!this.currentCard) return;
+
+        const cardElement = document.getElementById('bingoCard');
+        const gridElement = document.getElementById('cardGrid');
+        const cidElement = document.getElementById('displayCid');
+        const proofElement = document.getElementById('displayProof');
+
+        // Clear existing grid
+        gridElement.innerHTML = '';
+
+        // Render grid cells
+        const columns = ['B', 'I', 'N', 'G', 'O'];
+        for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+                
+                const value = this.currentCard.numbers[columns[col]][row];
+                cell.textContent = value;
+                
+                // Mark FREE space
+                if (value === 'FREE') {
+                    cell.classList.add('free');
+                } else {
+                    // Add click handler for marking
+                    cell.addEventListener('click', () => this.toggleSquare(row, col, cell));
+                }
+                
+                gridElement.appendChild(cell);
+            }
+        }
+
+        // Update card details
+        cidElement.textContent = `CID: ${this.currentCard.cid}`;
+        proofElement.textContent = `Proof: ${this.currentCard.proof}`;
+
+        // Show card
+        cardElement.classList.remove('hidden');
+    }
+
+    /**
+     * Toggle square marking for claim submission
+     */
+    toggleSquare(row, col, cellElement) {
+        const squareId = `${row}-${col}`;
+        
+        if (this.markedSquares.has(squareId)) {
+            this.markedSquares.delete(squareId);
+            cellElement.classList.remove('marked');
+        } else {
+            this.markedSquares.add(squareId);
+            cellElement.classList.add('marked');
+        }
+        
+        this.updateMarkedSquaresDisplay();
+    }
+
+    /**
+     * Update the display of marked squares
+     */
+    updateMarkedSquaresDisplay() {
+        const display = document.getElementById('markedSquares');
+        if (this.markedSquares.size === 0) {
+            display.textContent = 'No squares marked';
+        } else {
+            const squares = Array.from(this.markedSquares).join(', ');
+            display.textContent = `Marked: ${squares}`;
+        }
+    }
+
+    /**
+     * Email the card to user
+     */
+    async emailCard() {
+        if (!this.currentCard) {
+            this.showStatus('No card to email. Generate a card first.', 'error');
+            return;
+        }
+
+        const name = document.getElementById('userName').value;
+        const email = document.getElementById('userEmail').value;
+
+        if (!name || !email) {
+            this.showStatus('Please fill in your name and email.', 'error');
+            return;
+        }
+
+        try {
+            this.showStatus('Sending email...', 'info');
+
+            // Generate card image
+            const cardImage = await this.generateCardImage();
+
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/send-card`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cid: this.currentCard.cid,
+                    name,
+                    email,
+                    asset: cardImage
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            this.showStatus(`Email sent successfully to ${email}!`, 'success');
+
+            // Clear form
+            document.getElementById('emailForm').reset();
+
+        } catch (error) {
+            console.error('Error sending email:', error);
+            this.showStatus('Failed to send email. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * Generate card image using html2canvas
+     */
+    async generateCardImage() {
+        const cardElement = document.getElementById('bingoCard');
+        const canvas = await html2canvas(cardElement, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            logging: false
+        });
+        
+        return canvas.toDataURL('image/png');
+    }
+
+    /**
+     * Download card as PNG or PDF
+     */
+    async downloadCard(format) {
+        if (!this.currentCard) {
+            this.showStatus('No card to download. Generate a card first.', 'error');
+            return;
+        }
+
+        try {
+            this.showStatus(`Generating ${format.toUpperCase()}...`, 'info');
+
+            if (format === 'png') {
+                const cardImage = await this.generateCardImage();
+                this.downloadBlob(cardImage, `bingo-card-${this.currentCard.cid}.png`, 'image/png');
+            } else if (format === 'pdf') {
+                const cardImage = await this.generateCardImage();
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+                
+                // Add image to PDF
+                const imgWidth = 190;
+                const imgHeight = 190;
+                pdf.addImage(cardImage, 'PNG', 10, 10, imgWidth, imgHeight);
+                
+                // Save PDF
+                pdf.save(`bingo-card-${this.currentCard.cid}.pdf`);
+            }
+
+            this.showStatus(`${format.toUpperCase()} downloaded successfully!`, 'success');
+
+        } catch (error) {
+            console.error('Error downloading card:', error);
+            this.showStatus(`Failed to generate ${format.toUpperCase()}. Please try again.`, 'error');
+        }
+    }
+
+    /**
+     * Download blob as file
+     */
+    downloadBlob(dataUrl, filename, mimeType) {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    /**
+     * Submit winning claim
+     */
+    async submitClaim() {
+        if (!this.currentCard) {
+            this.showStatus('No card to claim. Generate a card first.', 'error');
+            return;
+        }
+
+        const name = document.getElementById('claimName').value;
+        const email = document.getElementById('claimEmail').value;
+        const attachment = document.getElementById('claimAttachment').files[0];
+
+        if (!name || !email) {
+            this.showStatus('Please fill in your name and email.', 'error');
+            return;
+        }
+
+        if (this.markedSquares.size === 0) {
+            this.showStatus('Please mark your winning squares on the card.', 'error');
+            return;
+        }
+
+        // Validate bingo
+        if (!this.validateBingo()) {
+            this.showStatus('The marked squares do not form a valid bingo. Please check your selection.', 'error');
+            return;
+        }
+
+        try {
+            this.showStatus('Submitting claim...', 'info');
+
+            // Prepare attachment if present
+            let attachmentData = null;
+            if (attachment) {
+                attachmentData = await this.fileToBase64(attachment);
+            }
+
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/claim`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cid: this.currentCard.cid,
+                    proof: this.currentCard.proof,
+                    name,
+                    email,
+                    marks: Array.from(this.markedSquares),
+                    attachment: attachmentData
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            this.showStatus(`Claim submitted successfully! Reference: ${result.claimRef}`, 'success');
+
+            // Clear form
+            document.getElementById('claimForm').reset();
+            this.markedSquares.clear();
+            this.updateMarkedSquaresDisplay();
+            this.renderCard(); // Refresh to remove markings
+
+        } catch (error) {
+            console.error('Error submitting claim:', error);
+            this.showStatus('Failed to submit claim. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * Validate if marked squares form a valid bingo
+     */
+    validateBingo() {
+        const squares = Array.from(this.markedSquares).map(s => s.split('-').map(n => parseInt(n)));
+        
+        // Check rows
+        for (let row = 0; row < 5; row++) {
+            const rowSquares = squares.filter(s => s[0] === row);
+            if (rowSquares.length === 5) return true;
+        }
+        
+        // Check columns
+        for (let col = 0; col < 5; col++) {
+            const colSquares = squares.filter(s => s[1] === col);
+            if (colSquares.length === 5) return true;
+        }
+        
+        // Check diagonals
+        const diagonal1 = squares.filter(s => s[0] === s[1]);
+        if (diagonal1.length === 5) return true;
+        
+        const diagonal2 = squares.filter(s => s[0] + s[1] === 4);
+        if (diagonal2.length === 5) return true;
+        
+        return false;
+    }
+
+    /**
+     * Convert file to base64
+     */
+    fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    /**
+     * Show status message to user
+     */
+    showStatus(message, type = 'info') {
+        const container = document.getElementById('statusMessages');
+        const messageEl = document.createElement('div');
+        messageEl.className = `status-message ${type}`;
+        messageEl.textContent = message;
+        
+        container.appendChild(messageEl);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (messageEl.parentNode) {
+                messageEl.parentNode.removeChild(messageEl);
+            }
+        }, 5000);
+    }
+}
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.bingoApp = new BingoCardGenerator();
+});
+
+// Service Worker registration for PWA capabilities (optional)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}

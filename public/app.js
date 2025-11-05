@@ -286,7 +286,7 @@ class BingoCardGenerator {
     }
 
     /**
-     * Email the card to user
+     * Deploy automation to email the card to user
      */
     async emailCard() {
         if (!this.currentCard) {
@@ -303,12 +303,13 @@ class BingoCardGenerator {
         }
 
         try {
-            this.showStatus('Sending email...', 'info');
+            this.showStatus('Deploying email automation...', 'info');
 
             // Generate card image
             const cardImage = await this.generateCardImage();
 
-            const response = await fetch(`${this.supabaseUrl}/functions/v1/send-card`, {
+            // Deploy AA automation instead of sending email directly
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/deploy-card-automation`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -326,14 +327,14 @@ class BingoCardGenerator {
             }
 
             const result = await response.json();
-            this.showStatus(`Email sent successfully to ${email}!`, 'success');
+            this.showStatus(`Email automation deployed successfully! Deployment ID: ${result.deploymentId}`, 'success');
 
             // Clear form
             document.getElementById('emailForm').reset();
 
         } catch (error) {
-            console.error('Error sending email:', error);
-            this.showStatus('Failed to send email. Please try again.', 'error');
+            console.error('Error deploying email automation:', error);
+            this.showStatus('Failed to deploy email automation. Please try again.', 'error');
         }
     }
 
@@ -401,7 +402,7 @@ class BingoCardGenerator {
     }
 
     /**
-     * Submit winning claim
+     * Deploy automation to process winning claim
      */
     async submitClaim() {
         if (!this.currentCard) {
@@ -430,7 +431,7 @@ class BingoCardGenerator {
         }
 
         try {
-            this.showStatus('Submitting claim...', 'info');
+            this.showStatus('Deploying claim processing automation...', 'info');
 
             // Prepare attachment if present
             let attachmentData = null;
@@ -438,7 +439,8 @@ class BingoCardGenerator {
                 attachmentData = await this.fileToBase64(attachment);
             }
 
-            const response = await fetch(`${this.supabaseUrl}/functions/v1/claim`, {
+            // Deploy AA automation instead of processing claim directly
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/deploy-claim-automation`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -458,7 +460,7 @@ class BingoCardGenerator {
             }
 
             const result = await response.json();
-            this.showStatus(`Claim submitted successfully! Reference: ${result.claimRef}`, 'success');
+            this.showStatus(`Claim automation deployed successfully! Reference: ${result.claimRef}, Deployment ID: ${result.deploymentId}`, 'success');
 
             // Clear form
             document.getElementById('claimForm').reset();
@@ -467,8 +469,8 @@ class BingoCardGenerator {
             this.renderCard(); // Refresh to remove markings
 
         } catch (error) {
-            console.error('Error submitting claim:', error);
-            this.showStatus('Failed to submit claim. Please try again.', 'error');
+            console.error('Error deploying claim automation:', error);
+            this.showStatus('Failed to deploy claim automation. Please try again.', 'error');
         }
     }
 

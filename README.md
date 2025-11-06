@@ -8,19 +8,16 @@ A serverless, privacy-first web application for generating cryptographically ver
 
 This system is **intentionally designed WITHOUT any database** - it's completely privacy-first and stateless.
 
-## 📚 **Complete Documentation**
+## 📚 **Documentation**
 
-**➡️ See [COMPREHENSIVE_GUIDE.md](COMPREHENSIVE_GUIDE.md) for the complete guide including:**
+- **📖 [COMPREHENSIVE_GUIDE.md](COMPREHENSIVE_GUIDE.md)** - Complete setup, testing & troubleshooting
+- **🏗️ [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md)** - System architecture & technical details  
+- **📁 [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Clean file organization & what was removed
 
-- ✅ **Step-by-step deployment guide** 
-- ✅ **Environment setup and configuration**
-- ✅ **Upload function testing methods**
-- ✅ **Direct cURL testing commands**
-- ✅ **Comprehensive troubleshooting guide**
-- ✅ **Debug tools and utilities**
-- ✅ **Pre-deployment checklist**
-
-**📖 For system architecture, see [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md)**
+### **🧪 Testing Tools**
+- `test-proof-generator.js` - Generate valid test payloads
+- `test-upload.sh/.ps1` - Test upload functionality
+- Enhanced error messages in web app
 
 ## 🚀 **Quick Start**
 

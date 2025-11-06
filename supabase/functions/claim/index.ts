@@ -1,4 +1,4 @@
-// Supabase Edge Function: Claim Prize
+bugfix: env variable// Supabase Edge Function: Claim Prize
 // Validates winning bingo cards and forwards claims to community inbox
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"

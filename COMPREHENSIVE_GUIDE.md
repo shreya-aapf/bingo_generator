@@ -217,7 +217,7 @@ node test-proof-generator.js --payload YOUR_SERVER_SECRET
 
 ## 🛠️ Troubleshooting Guide
 
-If you're getting "failed to upload card" errors, follow this diagnostic checklist.
+Quick fixes for common issues with your bingo application.
 
 ### **Step 1: Test Basic Connectivity**
 
@@ -233,37 +233,40 @@ Click the **"Test Upload Service"** button in your bingo app. This tests:
 3. Try uploading again and look for detailed error messages
 4. Enhanced error handling now shows specific issues instead of generic errors
 
-### **Step 3: Verify Supabase Setup**
+### **Step 3: Quick Fixes for Common Issues**
 
-#### **Check Function Deployment**
+#### **❌ 401 Unauthorized Error**
 ```bash
-# List deployed functions
-supabase functions list
-
-# Should show: upload-winning-card (deployed)
-```
-
-#### **Check Environment Variables**
-```bash
-# List set secrets (won't show values)
+# Check environment variables are set
 supabase secrets list
-
 # Should show: SUPABASE_ANON_KEY, SERVER_SECRET
+
+# If missing, set them:
+supabase secrets set SUPABASE_ANON_KEY=your_anon_key
+supabase secrets set SERVER_SECRET=your_random_secret
 ```
 
-#### **Check Storage Bucket**
-- Go to: https://supabase.com/dashboard/project/jnsfslmcowcefhpszrfx/storage/buckets
-- Ensure bucket named `bingo_cards` exists
-- Create if missing: Click "New Bucket" → Name: `bingo_cards` → Public: Yes
+#### **❌ 404 Function Not Found**
+```bash
+# Deploy the functions
+supabase functions deploy generate-proof
+supabase functions deploy upload-winning-card
+```
 
-### **Step 4: Check Function Logs**
+#### **❌ Storage Upload Failed**
+- **Create Storage Bucket**: Dashboard → Storage → Create `bingo_cards` bucket
+- **Make it Public**: Set bucket to public (no RLS needed for bingo cards)
+
+#### **❌ CORS Errors**
+- **Already Fixed**: Functions have permissive CORS headers
+- **If persists**: Check browser console for specific CORS details
+
+### **Step 4: View Function Logs**
 
 ```bash
-# View real-time logs
+# Watch logs in real-time during testing
 supabase functions logs upload-winning-card --follow
-
-# Or check in dashboard
-# https://supabase.com/dashboard/project/jnsfslmcowcefhpszrfx/functions/upload-winning-card
+supabase functions logs generate-proof --follow
 ```
 
 ---

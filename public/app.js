@@ -424,9 +424,18 @@ class BingoCardGenerator {
             this.showStatus('Generating PNG...', 'info');
 
             const cardImage = await this.generateCardImage();
-            this.downloadBlob(cardImage, `bingo-card-${this.currentCard.cid}.png`, 'image/png');
+            
+            // Include markings info in filename if any squares are marked
+            const hasMarkings = this.markedSquares.size > 0;
+            const suffix = hasMarkings ? '-with-markings' : '';
+            const filename = `bingo-card-${this.currentCard.cid}${suffix}.png`;
+            
+            this.downloadBlob(cardImage, filename, 'image/png');
 
-            this.showStatus('PNG downloaded successfully!', 'success');
+            const statusMsg = hasMarkings 
+                ? 'PNG downloaded with your markings!' 
+                : 'PNG downloaded successfully!';
+            this.showStatus(statusMsg, 'success');
 
         } catch (error) {
             console.error('Error downloading card:', error);

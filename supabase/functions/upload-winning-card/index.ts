@@ -86,19 +86,19 @@ serve(async (req) => {
 
     // Get environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY')
     const serverSecret = Deno.env.get('SERVER_SECRET')
 
-    if (!supabaseUrl || !supabaseServiceKey || !serverSecret) {
+    if (!supabaseUrl || !serviceRoleKey || !serverSecret) {
       console.error('Missing required environment variables:', {
         supabaseUrl: !!supabaseUrl,
-        supabaseServiceKey: !!supabaseServiceKey,
+        serviceRoleKey: !!serviceRoleKey,
         serverSecret: !!serverSecret
       })
       return new Response(
         JSON.stringify({ 
           error: 'Server configuration error',
-          details: 'Missing SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, or SERVER_SECRET'
+          details: 'Missing SUPABASE_URL, SERVICE_ROLE_KEY, or SERVER_SECRET'
         }),
         { 
           status: 500, 
@@ -108,7 +108,7 @@ serve(async (req) => {
     }
 
     // Create Supabase client with service role key for storage access
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     // Verify proof
     const expectedProof = await generateHMACProof(cid, serverSecret)

@@ -153,23 +153,25 @@ serve(async (req) => {
     })
 
     // Store claim submission in database for easy tracking (optional)
-    try {
-      await storeClaim({
-        supabase,
-        claimRef,
-        cid,
-        proof,
-        name,
-        email,
-        marks,
-        fileName: uploadResult.fileName,
-        bucketUrl: uploadResult.publicUrl,
-        hasAttachment: !!attachment
-      })
-    } catch (dbError) {
-      // Database operations are optional - don't fail the upload if DB is unavailable
-      console.warn('Database storage failed (continuing without DB):', dbError.message)
-      console.log('File uploaded successfully to storage, skipping database tracking')
+    const dbResult = await storeClaim({
+      supabase,
+      claimRef,
+      cid,
+      proof,
+      name,
+      email,
+      marks,
+      fileName: uploadResult.fileName,
+      bucketUrl: uploadResult.publicUrl,
+      hasAttachment: !!attachment
+    })
+    
+    if (!dbResult.stored) {
+      console.log('📁 File uploaded to storage successfully')
+      console.log(`ℹ️  Database tracking skipped: ${dbResult.message}`)
+    } else {
+      console.log('📁 File uploaded to storage successfully')
+      console.log('📊 Claim also stored in database')
     }
 
     const response: UploadWinningCardResponse = {
@@ -247,22 +249,25 @@ async function storeClaim({
       })
 
     if (error) {
-      // Provide specific error messages for common issues
+      // Handle database errors gracefully - database is optional for bingo game
       if (error.code === '42P01') {
-        throw new Error(`Table 'bingo_claims' does not exist. Run the migration or disable database tracking.`)
+        console.log(`ℹ️  Table 'bingo_claims' does not exist - skipping database storage (privacy-first mode)`)
+        return { stored: false, reason: 'table_missing', message: 'No database table (privacy-first)' }
       } else if (error.code === '42501') {
-        throw new Error(`Permission denied. Check RLS policies on 'bingo_claims' table.`)
+        console.log(`ℹ️  Database permissions issue - skipping database storage`)
+        return { stored: false, reason: 'permission_denied', message: 'Database permissions issue' }
       } else {
-        throw new Error(`Database error: ${error.message} (Code: ${error.code})`)
+        console.log(`ℹ️  Database error - continuing without database: ${error.message}`)
+        return { stored: false, reason: 'database_error', message: error.message }
       }
     }
 
     console.log(`✅ Claim stored in database: ${claimRef}`)
-    return data
+    return { stored: true, data }
     
   } catch (error) {
-    console.error('❌ Database operation failed:', error.message)
-    throw error
+    console.log(`ℹ️  Database operation failed - continuing without database: ${error.message}`)
+    return { stored: false, reason: 'exception', message: error.message }
   }
 }
 

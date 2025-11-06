@@ -103,7 +103,7 @@ header h1 {
 
 /* Remove subtitle styles since we're removing the tagline */
 
-main {
+.three-column-layout {
     flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -115,38 +115,235 @@ main {
 
 /* Tablet: stack to two columns */
 @media (max-width: 1200px) {
-    main {
+    .three-column-layout {
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
     }
     
-    .claim-section {
+    .left-column {
         grid-column: 1 / -1;
-        margin-top: 1rem;
+        order: 1;
+    }
+    
+    .middle-column {
+        grid-column: 1;
+        order: 2;
+    }
+    
+    .right-column {
+        grid-column: 2;
+        order: 3;
     }
 }
 
 /* Mobile: stack vertically */
 @media (max-width: 768px) {
-    main {
+    .three-column-layout {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
     
-    .claim-section {
+    .left-column,
+    .middle-column,
+    .right-column {
         grid-column: 1;
-        margin-top: 0;
+    }
+    
+    .left-column {
+        order: 1;
+    }
+    
+    .middle-column {
+        order: 2;
+    }
+    
+    .right-column {
+        order: 3;
     }
 }
 
-/* Card Generation Section - Left Side */
-.card-section {
+/* Left Column: Instructions Section */
+.left-column.instructions-section {
     background: var(--surface);
     border: 4px solid var(--border);
     padding: 1.5rem;
     box-shadow: var(--shadow-color);
     transform: rotate(0.5deg);
-    grid-column: 1;
+}
+
+.instruction-card {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.instruction-card h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: 2px 2px 0px var(--secondary-color);
+}
+
+.instructions-content h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    margin: 1rem 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.instructions-content h4 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    color: var(--accent-color);
+    margin: 0.8rem 0 0.3rem 0;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.instructions-content ol,
+.instructions-content ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+    color: var(--text);
+}
+
+.instructions-content li {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.instructions-content strong {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.privacy-note {
+    background: rgba(45, 143, 71, 0.1);
+    border: 2px solid var(--success-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.privacy-note p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.important-note {
+    background: rgba(255, 90, 16, 0.1);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 5px solid var(--primary-color);
+}
+
+.important-note h4 {
+    color: var(--primary-color) !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.important-note p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.claim-tip {
+    background: rgba(255, 188, 3, 0.15);
+    border: 2px solid var(--accent-color);
+    border-radius: 6px;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.debug-section {
+    background: rgba(102, 45, 143, 0.1);
+    border: 2px solid var(--secondary-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.debug-section h4 {
+    color: var(--secondary-color) !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 1rem !important;
+}
+
+.debug-section p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.debug-section .btn {
+    margin-top: 0.5rem;
+}
+
+/* Middle Column: Card Generation Section */
+.middle-column.card-section {
+    background: var(--surface);
+    border: 4px solid var(--border);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-color);
+    transform: rotate(-0.3deg);
+}
+
+.generator-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.download-section {
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px dashed var(--border);
+}
+
+.download-warning {
+    background: rgba(255, 90, 16, 0.15);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    animation: subtle-pulse 2s infinite;
+}
+
+.download-warning h4 {
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+}
+
+.download-warning p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-weight: 600;
+}
+
+@keyframes subtle-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
 }
 
 .controls {
@@ -347,33 +544,74 @@ main {
     color: var(--text-muted);
 }
 
-/* Actions Section - Middle Column */
-.actions-section {
-    background: var(--surface);
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
-    border: 4px solid var(--border);
-    transform: rotate(-0.7deg);
-    grid-column: 2;
-}
-
-/* Claim Prize Section - Right Column */
-.claim-section {
+/* Right Column: Claim Prize Section */
+.right-column.claim-section {
     background: var(--surface);
     padding: 1.5rem;
     box-shadow: var(--shadow);
     border: 4px solid var(--border);
     transform: rotate(0.3deg);
-    grid-column: 3;
 }
 
 .claim-card {
-    margin-bottom: 0;
+    background: transparent;
     border: none;
     padding: 0;
-    background: transparent;
     box-shadow: none;
     transform: none;
+}
+
+.claim-card h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: 2px 2px 0px var(--secondary-color);
+}
+
+.claim-intro {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.claim-form-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-top: 1rem;
+}
+
+.claim-placeholder {
+    background: rgba(255, 188, 3, 0.1);
+    border: 2px dashed var(--accent-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 1rem;
+}
+
+.btn-claim {
+    width: 100%;
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+
+.marked-display {
+    background: var(--surface-dark);
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    min-height: 40px;
+    color: var(--text-light);
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
 }
 
 .action-grid {
@@ -396,15 +634,6 @@ main {
     box-shadow: 4px 4px 0px var(--primary-color);
 }
 
-/* Special styling for claim card in third column */
-.claim-section .claim-card {
-    padding: 1.2rem;
-    border: 3px solid var(--border);
-    background: var(--surface);
-    box-shadow: 4px 4px 0px var(--aa-gold);
-    transform: rotate(0.8deg);
-    margin-bottom: 0;
-}
 
 .action-card h3 {
     margin-bottom: 0.7rem;
@@ -637,7 +866,7 @@ footer {
         padding: 1rem;
     }
     
-    main {
+    .three-column-layout {
         gap: 1rem;
     }
     
@@ -684,9 +913,9 @@ footer {
         padding: 0.5rem;
     }
     
-    .card-section,
-    .actions-section,
-    .claim-section {
+    .left-column,
+    .middle-column,
+    .right-column {
         padding: 1rem;
     }
     
@@ -711,7 +940,7 @@ footer {
         -webkit-text-stroke: 1px var(--surface);
     }
     
-    main {
+    .three-column-layout {
         gap: 0.5rem;
     }
 }
@@ -735,5 +964,368 @@ footer {
         background: #000 !important;
         -webkit-print-color-adjust: exact;
         color-adjust: exact;
+    }
+}
+
+/* Download Card Styles - Square Corners */
+.download-card-sleek {
+    background: var(--surface);
+    border: 3px solid var(--border);
+    padding: 25px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+
+.download-card-sleek h3 {
+    color: var(--text);
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.btn-download {
+    background: var(--aa-orange);
+    color: var(--text-light);
+    border: 3px solid var(--border);
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.btn-download:hover {
+    background: var(--aa-gold);
+    color: var(--text);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-color);
+}
+
+.btn-download:active {
+    transform: translate(0, 0);
+    box-shadow: var(--shadow);
+}
+
+/* Claim Section Inline Styles */
+.claim-section-inline {
+    margin-top: 20px;
+}
+
+.claim-section-inline .action-card {
+    background: var(--surface);
+    border: 3px solid var(--aa-plum);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+}
+
+/* Arcade Background Pattern */
+.arcade-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.15;
+}
+
+.bg-machine-1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    transform: rotate(-5deg);
+}
+
+.bg-machine-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 5%;
+    transform: rotate(3deg);
+}
+
+.bg-machine-3 {
+    position: absolute;
+    top: 60%;
+    right: 15%;
+    transform: rotate(-2deg);
+}
+
+.arcade-machine {
+    width: 80px;
+    height: 120px;
+    background: linear-gradient(135deg, #4a7c59 0%, #2d4a36 100%);
+    border: 3px solid #1a2e20;
+    border-radius: 8px 8px 4px 4px;
+    position: relative;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.6);
+    transform: perspective(200px) rotateX(5deg);
+}
+
+.screen {
+    width: 60px;
+    height: 45px;
+    background: #000;
+    border: 2px solid #333;
+    border-radius: 4px;
+    margin: 8px auto 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+    height: 40px;
+}
+
+.joystick {
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle, #ff4444 30%, #cc0000 70%);
+    border-radius: 50%;
+    border: 1px solid #990000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.button {
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #ffcc00 30%, #ff9900 70%);
+    border-radius: 50%;
+    border: 1px solid #cc7700;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Game Screens */
+.game-tetris {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #001122 0%, #000811 100%);
+    position: relative;
+}
+
+.tetris-blocks {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.block {
+    width: 8px;
+    height: 8px;
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.t-block {
+    background: #9900ff;
+    top: -4px;
+    left: -4px;
+    box-shadow: 0 0 4px #9900ff;
+}
+
+.i-block {
+    background: #00ffff;
+    top: 4px;
+    left: -12px;
+    width: 24px;
+    height: 4px;
+    box-shadow: 0 0 4px #00ffff;
+}
+
+.l-block {
+    background: #ff9900;
+    top: 8px;
+    left: 4px;
+    box-shadow: 0 0 4px #ff9900;
+}
+
+.game-pacman {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #000033 0%, #000011 100%);
+    position: relative;
+}
+
+.pacman {
+    width: 12px;
+    height: 12px;
+    background: #ffff00;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 6px #ffff00;
+    animation: pacman-move 2s linear infinite;
+}
+
+.pacman::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-left: 8px solid #000033;
+    right: -2px;
+    top: 0;
+    animation: pacman-chomp 0.3s linear infinite;
+}
+
+.dots {
+    position: absolute;
+    top: 50%;
+    left: 60%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+}
+
+.dot {
+    width: 3px;
+    height: 3px;
+    background: #ffff88;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #ffff88;
+}
+
+.game-space {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #001133 0%, #000511 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.spaceship {
+    width: 10px;
+    height: 8px;
+    background: linear-gradient(45deg, #ffffff 0%, #cccccc 100%);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px #ffffff;
+    animation: spaceship-hover 1.5s ease-in-out infinite;
+}
+
+.stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.star {
+    width: 2px;
+    height: 2px;
+    background: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: 0 0 2px #ffffff;
+    animation: star-twinkle 2s linear infinite;
+}
+
+.star:nth-child(1) {
+    top: 20%;
+    left: 25%;
+    animation-delay: 0s;
+}
+
+.star:nth-child(2) {
+    top: 40%;
+    right: 30%;
+    animation-delay: 0.7s;
+}
+
+.star:nth-child(3) {
+    top: 70%;
+    left: 60%;
+    animation-delay: 1.4s;
+}
+
+/* Arcade Animations */
+@keyframes pacman-move {
+    0% { left: 10%; }
+    100% { left: 70%; }
+}
+
+@keyframes pacman-chomp {
+    0%, 50% { transform: rotate(0deg); }
+    25%, 75% { transform: rotate(45deg); }
+}
+
+@keyframes spaceship-hover {
+    0%, 100% { transform: translateX(-50%) translateY(0px); }
+    50% { transform: translateX(-50%) translateY(-2px); }
+}
+
+@keyframes star-twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Arcade background responsive adjustments */
+@media (max-width: 768px) {
+    .arcade-background {
+        opacity: 0.1;
+    }
+    
+    .arcade-machine {
+        width: 60px;
+        height: 90px;
+    }
+    
+    .screen {
+        width: 42px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .arcade-background {
+        opacity: 0.08;
+    }
+    
+    .arcade-machine {
+        width: 50px;
+        height: 75px;
+    }
+    
+    .screen {
+        width: 35px;
+        height: 26px;
+    }
+    
+    .bg-machine-1 {
+        top: 15%;
+        right: 5%;
+    }
+    
+    .bg-machine-2 {
+        bottom: 20%;
+        left: 2%;
+    }
+    
+    .bg-machine-3 {
+        top: 50%;
+        right: 8%;
     }
 }

@@ -22,24 +22,20 @@ class BingoCardGenerator {
             this.generateNewCard();
         });
 
-        // Email form
-        document.getElementById('emailForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.emailCard();
-        });
-
-        // Download buttons
+        // Download button
         document.getElementById('downloadPng').addEventListener('click', () => {
-            this.downloadCard('png');
-        });
-        document.getElementById('downloadPdf').addEventListener('click', () => {
-            this.downloadCard('pdf');
+            this.downloadCard();
         });
 
         // Claim form
         document.getElementById('claimForm').addEventListener('submit', (e) => {
             e.preventDefault();
             this.submitClaim();
+        });
+
+        // Test connection button
+        document.getElementById('testConnection').addEventListener('click', () => {
+            this.testConnectionAndReport();
         });
     }
 
@@ -85,10 +81,12 @@ class BingoCardGenerator {
             document.getElementById('cardProof').textContent = `Proof: ${proof}`;
             
             // Show action sections
-            document.getElementById('actionsSection').classList.remove('hidden');
-            document.getElementById('claimSection').classList.remove('hidden');
+            document.getElementById('downloadSection').classList.remove('hidden');
+            document.getElementById('claimFormContainer').classList.remove('hidden');
+            document.getElementById('claimPlaceholder').classList.add('hidden');
+            document.getElementById('arcadeBackground').classList.remove('hidden');
             
-            this.showStatus(`Card ${cid} generated successfully!`, 'success');
+            this.showStatus(`Card ${cid} generated! 🚨 DOWNLOAD IT NOW - don't wait!`, 'success');
             
         } catch (error) {
             console.error('Error generating card:', error);
@@ -163,7 +161,7 @@ class BingoCardGenerator {
         };
         
         // Set center as easy FREE space
-        columns.N[2] = 'Sign up for\nPF Summit';
+        columns.N[2] = 'Join the Pathfinder\nSummit group in\nthe community';
         
         return columns;
     }
@@ -200,89 +198,89 @@ class BingoCardGenerator {
     getContentPool(columnLetter) {
         const pools = {
             B: [
-                'Book a demo',
-                'Browse Bot Store',
-                'Build your first bot',
-                'Backup your work',
+                'Visit HEDEHI\'s Virtual Booth',
+                'Build an HR AI agent (live in session or on demand)',
+                'Build an AP AI agent',
+                'Book a demo session',
+                'Browse the Bot Store',
                 'Bookmark a session',
+                'Beta test new features',
+                'Brainstorm AI use cases',
+                'Build your first automation',
+                'Backup your project',
                 'Badge collection started',
-                'Brainstorm with AI',
-                'Beta feature tested',
-                'Business case created',
-                'Breakout room joined',
-                'Best practice noted',
-                'Benchmark set',
-                'Bot deployed',
-                'Blueprint downloaded',
-                'Buzz word counted'
+                'Business case developed',
+                'Best practice shared',
+                'Breakthrough moment achieved',
+                'Buzz about AI agents'
             ],
             I: [
+                'Visit Hexa data\'s virtual booth',
+                'Integrate AI with existing systems',
+                'Implement automation workflow',
+                'Innovate with AI agents',
                 'Install AA Desktop',
-                'Integrate with API',
-                'Import a package',
-                'Identify use case',
-                'Innovate workflow',
-                'Inspect bot logs',
-                'Implement security',
-                'Invite team member',
-                'Iterate on design',
-                'Improve process',
-                'Index documents',
-                'Initiate automation',
-                'Issue resolved',
-                'Interact with expert',
-                'Increase efficiency'
+                'Identify automation opportunities',
+                'Interact with AI experts',
+                'Import pre-built packages',
+                'Improve process efficiency',
+                'Inspect automation logs',
+                'Initiate digital transformation',
+                'Issue resolution automated',
+                'Index knowledge base',
+                'Invite team collaboration',
+                'Increase ROI measurement'
             ],
             N: [
-                'Network with peers',
-                'Navigate Control Room',
-                'New skill learned',
-                'Note key insight',
-                'Next step planned',
-                'Notify stakeholder',
-                'Nuance understood',
-                'Navigate roadmap',
-                'Negotiate timeline',
-                'Nurture partnership',
-                'No-code solution',
-                'Naming convention',
-                'Notification setup',
-                'Nested logic used',
-                'News feature found'
+                'Build an HR AI agent (live in session or on demand)',
+                'Network with AI professionals',
+                'Navigate the Control Room',
+                'New AI skill acquired',
+                'Note key insights',
+                'Next-gen automation demo',
+                'Notify stakeholders',
+                'No-code solution built',
+                'Nurture AI partnerships',
+                'Navigate platform features',
+                'News about AI updates',
+                'Naming conventions established',
+                'Nested automation logic',
+                'Natural language processing',
+                'New use case discovered'
             ],
             G: [
-                'Get certified',
-                'Generate report',
-                'Governance reviewed',
-                'Goal achieved',
-                'Group collaboration',
-                'Get hands-on demo',
-                'Gather requirements',
-                'GitHub integration',
-                'Global deployment',
-                'Growth strategy',
-                'GUI automation',
-                'Guide team member',
-                'Gamification added',
-                'Gap analysis done',
-                'Green light received'
+                'Build an AP AI agent',
+                'Get AA certification',
+                'Generate automation reports',
+                'Governance framework reviewed',
+                'Goal achievement tracked',
+                'Group training attended',
+                'Get hands-on experience',
+                'Gather business requirements',
+                'GitHub integration setup',
+                'Global deployment planned',
+                'Growth strategy defined',
+                'GUI automation created',
+                'Guide team members',
+                'Gap analysis completed',
+                'Green light for project'
             ],
             O: [
-                'Optimize performance',
-                'Orchestrate workflow',
-                'Onboard new user',
-                'Overcome challenge',
-                'Organize repository',
+                'Sign up for the Agentic Bounty Challenge',
+                'Optimize automation performance',
+                'Orchestrate complex workflows',
+                'Onboard new team members',
+                'Overcome implementation challenges',
+                'Organize automation repository',
                 'Operate bot fleet',
-                'Outline strategy',
-                'Observe best practice',
-                'Obtain approval',
-                'Offer feedback',
-                'OpenAI connected',
-                'Office automation',
-                'Output validated',
-                'Opportunity identified',
-                'Outcome measured'
+                'Outline AI strategy',
+                'Observe industry trends',
+                'Obtain executive approval',
+                'Offer peer feedback',
+                'OpenAI integration demo',
+                'Office productivity boost',
+                'Output quality validated',
+                'Opportunity assessment done'
             ]
         };
         
@@ -398,61 +396,6 @@ class BingoCardGenerator {
         }
     }
 
-    /**
-     * Deploy automation to email the card to user
-     */
-    async emailCard() {
-        if (!this.currentCard) {
-            this.showStatus('No card to email. Generate a card first.', 'error');
-            return;
-        }
-
-        const name = document.getElementById('userName').value;
-        const email = document.getElementById('userEmail').value;
-
-        if (!name || !email) {
-            this.showStatus('Please fill in your name and email.', 'error');
-            return;
-        }
-
-        try {
-            this.showStatus('Deploying email automation...', 'info');
-
-            // Update user-card mapping with email info (background operation)
-            this.storeUserCardMapping(this.currentCard.cid, name, email).catch(console.warn);
-
-            // Generate card image
-            const cardImage = await this.generateCardImage();
-
-            // Deploy AA automation instead of sending email directly
-            const response = await fetch(`${this.supabaseUrl}/functions/v1/deploy-card-automation`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    cid: this.currentCard.cid,
-                    name,
-                    email,
-                    asset: cardImage
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            this.showStatus(`Email automation deployed successfully! Deployment ID: ${result.deploymentId}`, 'success');
-
-            // Clear form
-            document.getElementById('emailForm').reset();
-
-        } catch (error) {
-            console.error('Error deploying email automation:', error);
-            this.showStatus('Failed to deploy email automation. Please try again.', 'error');
-        }
-    }
 
     /**
      * Generate card image using html2canvas
@@ -469,39 +412,25 @@ class BingoCardGenerator {
     }
 
     /**
-     * Download card as PNG or PDF
+     * Download card as PNG
      */
-    async downloadCard(format) {
+    async downloadCard() {
         if (!this.currentCard) {
             this.showStatus('No card to download. Generate a card first.', 'error');
             return;
         }
 
         try {
-            this.showStatus(`Generating ${format.toUpperCase()}...`, 'info');
+            this.showStatus('Generating PNG...', 'info');
 
-            if (format === 'png') {
-                const cardImage = await this.generateCardImage();
-                this.downloadBlob(cardImage, `bingo-card-${this.currentCard.cid}.png`, 'image/png');
-            } else if (format === 'pdf') {
-                const cardImage = await this.generateCardImage();
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF();
-                
-                // Add image to PDF
-                const imgWidth = 190;
-                const imgHeight = 190;
-                pdf.addImage(cardImage, 'PNG', 10, 10, imgWidth, imgHeight);
-                
-                // Save PDF
-                pdf.save(`bingo-card-${this.currentCard.cid}.pdf`);
-            }
+            const cardImage = await this.generateCardImage();
+            this.downloadBlob(cardImage, `bingo-card-${this.currentCard.cid}.png`, 'image/png');
 
-            this.showStatus(`${format.toUpperCase()} downloaded successfully!`, 'success');
+            this.showStatus('PNG downloaded successfully!', 'success');
 
         } catch (error) {
             console.error('Error downloading card:', error);
-            this.showStatus(`Failed to generate ${format.toUpperCase()}. Please try again.`, 'error');
+            this.showStatus('Failed to generate PNG. Please try again.', 'error');
         }
     }
 
@@ -518,7 +447,7 @@ class BingoCardGenerator {
     }
 
     /**
-     * Deploy automation to process winning claim
+     * Upload winning card to bucket
      */
     async submitClaim() {
         if (!this.currentCard) {
@@ -547,7 +476,20 @@ class BingoCardGenerator {
         }
 
         try {
-            this.showStatus('Deploying claim processing automation...', 'info');
+            this.showStatus('Uploading winning card to bucket...', 'info');
+            
+            // Debug information
+            console.log('Upload details:', {
+                supabaseUrl: this.supabaseUrl,
+                cid: this.currentCard.cid,
+                proof: this.currentCard.proof,
+                markedSquares: Array.from(this.markedSquares),
+                name,
+                email
+            });
+
+            // Generate card image with markings
+            const cardImage = await this.generateCardImage();
 
             // Prepare attachment if present
             let attachmentData = null;
@@ -555,8 +497,8 @@ class BingoCardGenerator {
                 attachmentData = await this.fileToBase64(attachment);
             }
 
-            // Deploy AA automation instead of processing claim directly
-            const response = await fetch(`${this.supabaseUrl}/functions/v1/deploy-claim-automation`, {
+            // Upload winning card to Supabase bucket
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/upload-winning-card`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -567,16 +509,40 @@ class BingoCardGenerator {
                     name,
                     email,
                     marks: Array.from(this.markedSquares),
+                    asset: cardImage,
                     attachment: attachmentData
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Try to get detailed error message from response
+                let errorMessage = `HTTP ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                    if (errorData.details) {
+                        errorMessage += ` - ${errorData.details}`;
+                    }
+                } catch (e) {
+                    // If we can't parse the response, use status text
+                    errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                }
+                throw new Error(errorMessage);
             }
 
             const result = await response.json();
-            this.showStatus(`Claim automation deployed successfully! Reference: ${result.claimRef}, Deployment ID: ${result.deploymentId}`, 'success');
+            
+            // Check if the response indicates success
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            
+            this.showStatus(`Winning card uploaded successfully! File: ${result.fileName}`, 'success');
+            
+            // Optionally show the public URL
+            if (result.bucketUrl) {
+                console.log('Winning card available at:', result.bucketUrl);
+            }
 
             // Clear form
             document.getElementById('claimForm').reset();
@@ -585,8 +551,32 @@ class BingoCardGenerator {
             this.renderCard(); // Refresh to remove markings
 
         } catch (error) {
-            console.error('Error deploying claim automation:', error);
-            this.showStatus('Failed to deploy claim automation. Please try again.', 'error');
+            console.error('Error uploading winning card:', error);
+            
+            // Show more specific error messages based on the error
+            let userMessage = 'Failed to upload winning card. ';
+            
+            if (error.message.includes('Server configuration error')) {
+                userMessage += 'Server setup incomplete - contact administrator.';
+            } else if (error.message.includes('Invalid proof')) {
+                userMessage += 'Card verification failed - try generating a new card.';
+            } else if (error.message.includes('Only PNG files are allowed')) {
+                userMessage += 'Invalid file format detected.';
+            } else if (error.message.includes('Failed to upload to storage')) {
+                userMessage += 'Storage service unavailable - try again later.';
+            } else if (error.message.includes('HTTP 404')) {
+                userMessage += 'Upload service not found - check configuration.';
+            } else if (error.message.includes('HTTP 500')) {
+                userMessage += 'Server error - please try again or contact support.';
+            } else if (error.message.includes('CORS')) {
+                userMessage += 'Network configuration issue - contact administrator.';
+            } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                userMessage += 'Network connection failed - check your internet connection.';
+            } else {
+                userMessage += `Error: ${error.message}`;
+            }
+            
+            this.showStatus(userMessage, 'error');
         }
     }
 
@@ -660,6 +650,54 @@ class BingoCardGenerator {
         } catch (error) {
             console.error('Error storing user-card mapping:', error);
             throw error;
+        }
+    }
+
+    /**
+     * Test connection and report results to user
+     */
+    async testConnectionAndReport() {
+        this.showStatus('Testing upload service connection...', 'info');
+        
+        try {
+            const isConnected = await this.testUploadService();
+            
+            if (isConnected) {
+                this.showStatus('✅ Upload service is reachable! Connection test passed.', 'success');
+            } else {
+                this.showStatus('❌ Upload service connection failed. Check your Supabase URL or network connection.', 'error');
+            }
+            
+        } catch (error) {
+            this.showStatus('❌ Connection test failed: Network error or invalid URL.', 'error');
+        }
+    }
+
+    /**
+     * Test connection to the upload service
+     */
+    async testUploadService() {
+        try {
+            console.log('Testing upload service connectivity...');
+            
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/upload-winning-card`, {
+                method: 'OPTIONS',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            console.log('Upload service test response:', {
+                status: response.status,
+                statusText: response.statusText,
+                headers: Object.fromEntries(response.headers.entries())
+            });
+            
+            return response.ok;
+            
+        } catch (error) {
+            console.error('Upload service test failed:', error);
+            return false;
         }
     }
 

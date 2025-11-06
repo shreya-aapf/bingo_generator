@@ -13,15 +13,128 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
+    <!-- Arcade Background Pattern -->
+    <div class="arcade-background hidden" id="arcadeBackground">
+        <div class="arcade-machine bg-machine-1">
+            <div class="screen">
+                <div class="game-tetris">
+                    <div class="tetris-blocks">
+                        <div class="block t-block"></div>
+                        <div class="block i-block"></div>
+                        <div class="block l-block"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="joystick"></div>
+                <div class="buttons">
+                    <div class="button"></div>
+                    <div class="button"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arcade-machine bg-machine-2">
+            <div class="screen">
+                <div class="game-pacman">
+                    <div class="pacman"></div>
+                    <div class="dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="joystick"></div>
+                <div class="buttons">
+                    <div class="button"></div>
+                    <div class="button"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arcade-machine bg-machine-3">
+            <div class="screen">
+                <div class="game-space">
+                    <div class="spaceship"></div>
+                    <div class="stars">
+                        <div class="star"></div>
+                        <div class="star"></div>
+                        <div class="star"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="joystick"></div>
+                <div class="buttons">
+                    <div class="button"></div>
+                    <div class="button"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1>Pathfinder Bingo</h1>
         </header>
 
-        <main>
-            <!-- Card Generation Section -->
-            <section class="card-section">
-                <div class="controls">
+        <main class="three-column-layout">
+            <!-- Left Column: Instructions -->
+            <section class="left-column instructions-section">
+                <div class="instruction-card">
+                    <h2>🎯 Let's Play Bingo!</h2>
+                    <div class="instructions-content">
+                        <h3>🎮 Here's How It Works</h3>
+                        <p>Ready to join the fun? Here's your game plan:</p>
+                        <ol>
+                            <li><strong>Get Your Card:</strong> Hit "Generate New Card" and we'll create a unique bingo card just for you!</li>
+                            <li><strong>Save It Right Away:</strong> <em>Super important!</em> Download your card as PNG immediately - don't wait! If you refresh the page or close your browser, your card will be gone forever.</li>
+                            <li><strong>Print or Save:</strong> Keep that downloaded image handy on your phone, print it out, or save it somewhere safe</li>
+                            <li><strong>Play During the Event:</strong> As you experience activities that match your squares, mark them off on your saved copy</li>
+                            <li><strong>Win Big:</strong> Complete any full row, column, or diagonal and you've got a winner!</li>
+                        </ol>
+                        
+                        <h3>🏆 Ready to Claim Your Prize?</h3>
+                        <p>Got a winning pattern? Awesome! Here's what to do:</p>
+                        <ol>
+                            <li><strong>Come Back Here:</strong> Generate the same card again (your Card ID ensures it's identical)</li>
+                            <li><strong>Mark Your Wins:</strong> Click the squares on the screen that match your winning pattern</li>
+                            <li><strong>Fill the Form:</strong> Add your name, email, and any photos you took as proof</li>
+                            <li><strong>Submit & Celebrate:</strong> Send it off and wait for your prize!</li>
+                        </ol>
+                        
+                        <div class="important-note">
+                            <h4>⚠️ Don't Lose Your Card!</h4>
+                            <p><strong>This is crucial:</strong> Your bingo card only exists while this page is open. If you close the tab, refresh, or your browser crashes - poof! It's gone. That's why downloading it immediately is so important. Think of it like a paper ticket - once you lose it, there's no getting it back.</p>
+                        </div>
+                        
+                        <h3>📸 Pro Tips from the Pros</h3>
+                        <ul>
+                            <li><strong>Screenshot Everything:</strong> Take photos as you complete activities - they make great proof!</li>
+                            <li><strong>Mark as You Go:</strong> Don't wait until the end to mark your squares</li>
+                            <li><strong>Multiple Patterns:</strong> You can win with more than one pattern on the same card</li>
+                            <li><strong>Share the Fun:</strong> Each person gets their own unique card, so everyone can play!</li>
+                        </ul>
+
+                        <div class="debug-section">
+                            <h4>🔧 Having Issues?</h4>
+                            <p>If you're experiencing upload problems, click this button to test the connection:</p>
+                            <button id="testConnection" class="btn btn-secondary">Test Upload Service</button>
+                        </div>
+                        
+                        <div class="privacy-note">
+                            <h4>🛡️ Your Privacy Matters</h4>
+                            <p>We take your privacy seriously! Your bingo card is generated using cryptographic magic - no personal data stored on our servers. Your Card ID is both your identifier and your proof of authenticity. Pretty cool, right?</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Middle Column: Card Generation -->
+            <section class="middle-column card-section">
+                <div class="generator-controls">
                     <button id="generateCard" class="btn btn-primary">🎲 Generate New Card</button>
                     <div class="card-info">
                         <span id="cardId">Card ID: Not generated</span>
@@ -44,67 +157,57 @@
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <!-- User Actions Section - Middle Column -->
-            <section class="actions-section hidden" id="actionsSection">
-                <div class="action-grid">
-                    <!-- Email Card -->
-                    <div class="action-card">
-                        <h3>📧 Email My Card</h3>
-                        <p class="privacy-note">🔒 Your info is NOT stored - only used for this email</p>
-                        <form id="emailForm">
-                            <div class="form-group">
-                                <label for="userName">Name:</label>
-                                <input type="text" id="userName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="userEmail">Email:</label>
-                                <input type="email" id="userEmail" required>
-                            </div>
-                            <button type="submit" class="btn btn-secondary">📧 Send Card</button>
-                        </form>
+                
+                <!-- Download Section -->
+                <div class="download-section hidden" id="downloadSection">
+                    <div class="download-warning">
+                        <h4>⚠️ Download Your Card NOW!</h4>
+                        <p>This card will disappear if you refresh or close this page. Save it immediately!</p>
                     </div>
-
-                    <!-- Download Card -->
-                    <div class="action-card">
-                        <h3>💾 Download Card</h3>
-                        <p>Save your card locally</p>
-                        <div class="download-options">
-                            <button id="downloadPng" class="btn btn-secondary">📸 Download PNG</button>
-                            <button id="downloadPdf" class="btn btn-secondary">📄 Download PDF</button>
-                        </div>
-                    </div>
+                    <button id="downloadPng" class="btn btn-download">📸 Download PNG Now</button>
                 </div>
             </section>
 
-            <!-- Claim Prize Section - Right Column -->
-            <section class="claim-section hidden" id="claimSection">
-                <div class="action-card claim-card">
-                    <h3>🏆 Claim Prize</h3>
-                    <p>Submit your winning card</p>
-                    <form id="claimForm">
-                        <div class="form-group">
-                            <label for="claimName">Name:</label>
-                            <input type="text" id="claimName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="claimEmail">Email:</label>
-                            <input type="email" id="claimEmail" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Mark your winning squares:</label>
-                            <div class="marking-instructions">
-                                Click squares on your card above to mark them
+            <!-- Right Column: Claim Prize -->
+            <section class="right-column claim-section">
+                <div class="claim-card">
+                    <h2>🏆 Claim Your Prize</h2>
+                    <p class="claim-intro">Got a winning pattern? Submit your claim here!</p>
+                    
+                    <div class="claim-form-container hidden" id="claimFormContainer">
+                        <p class="claim-tip">💡 <strong>Remember:</strong> You should have already downloaded and marked your card offline before coming here!</p>
+                        <form id="claimForm">
+                            <div class="form-group">
+                                <label for="claimName">Your Full Name:</label>
+                                <input type="text" id="claimName" placeholder="What should we call you?" required>
                             </div>
-                            <div id="markedSquares"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="claimAttachment">Attachment (optional):</label>
-                            <input type="file" id="claimAttachment" accept="image/*,application/pdf">
-                        </div>
-                        <button type="submit" class="btn btn-primary">🏆 Submit Claim</button>
-                    </form>
+                            
+                            <div class="form-group">
+                                <label for="claimEmail">Email Address:</label>
+                                <input type="email" id="claimEmail" placeholder="Where can we reach you?" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Show Us Your Winning Pattern:</label>
+                                <div class="marking-instructions">
+                                    <p>Click the squares below that match your winning pattern from your downloaded card</p>
+                                    <div id="markedSquares" class="marked-display"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="claimAttachment">Got Photos? (Optional but Awesome!):</label>
+                                <input type="file" id="claimAttachment" accept="image/*,application/pdf">
+                                <small>Show us those completed activities in action!</small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-claim">🏆 Claim My Prize!</button>
+                        </form>
+                    </div>
+                    
+                    <div class="claim-placeholder" id="claimPlaceholder">
+                        <p>First things first - generate your bingo card and download it right away! Then come back here when you've got a winning pattern to claim your prize.</p>
+                    </div>
                 </div>
             </section>
 

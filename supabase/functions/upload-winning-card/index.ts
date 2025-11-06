@@ -22,11 +22,13 @@ interface UploadWinningCardResponse {
 }
 
 serve(async (req) => {
-  // CORS headers
+  // CORS headers - More permissive for development and testing
   const corsHeaders = {
-    'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') || '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-requested-with, accept, origin, referer, user-agent',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
+    'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Credentials': 'false'
   }
 
   // Handle CORS preflight
@@ -84,13 +86,20 @@ serve(async (req) => {
 
     // Get environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     const serverSecret = Deno.env.get('SERVER_SECRET')
 
-    if (!supabaseUrl || !supabaseAnonKey || !serverSecret) {
-      console.error('Missing required environment variables')
+    if (!supabaseUrl || !supabaseServiceKey || !serverSecret) {
+      console.error('Missing required environment variables:', {
+        supabaseUrl: !!supabaseUrl,
+        supabaseServiceKey: !!supabaseServiceKey,
+        serverSecret: !!serverSecret
+      })
       return new Response(
-        JSON.stringify({ error: 'Server configuration error' }),
+        JSON.stringify({ 
+          error: 'Server configuration error',
+          details: 'Missing SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, or SERVER_SECRET'
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -98,8 +107,8 @@ serve(async (req) => {
       )
     }
 
-    // Create Supabase client
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    // Create Supabase client with service role key for storage access
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Verify proof
     const expectedProof = await generateHMACProof(cid, serverSecret)
@@ -143,19 +152,25 @@ serve(async (req) => {
       attachment
     })
 
-    // Store claim submission in database for easy tracking
-    await storeClaim({
-      supabase,
-      claimRef,
-      cid,
-      proof,
-      name,
-      email,
-      marks,
-      fileName: uploadResult.fileName,
-      bucketUrl: uploadResult.publicUrl,
-      hasAttachment: !!attachment
-    })
+    // Store claim submission in database for easy tracking (optional)
+    try {
+      await storeClaim({
+        supabase,
+        claimRef,
+        cid,
+        proof,
+        name,
+        email,
+        marks,
+        fileName: uploadResult.fileName,
+        bucketUrl: uploadResult.publicUrl,
+        hasAttachment: !!attachment
+      })
+    } catch (dbError) {
+      // Database operations are optional - don't fail the upload if DB is unavailable
+      console.warn('Database storage failed (continuing without DB):', dbError.message)
+      console.log('File uploaded successfully to storage, skipping database tracking')
+    }
 
     const response: UploadWinningCardResponse = {
       success: true,
@@ -214,29 +229,41 @@ async function storeClaim({
   bucketUrl: string
   hasAttachment: boolean
 }) {
-  const { data, error } = await supabase
-    .from('bingo_claims')
-    .insert({
-      claim_ref: claimRef,
-      card_id: cid,
-      proof_code: proof,
-      claimant_name: name,
-      claimant_email: email,
-      winning_marks: marks,
-      card_file_name: fileName,
-      card_url: bucketUrl,
-      has_attachment: hasAttachment,
-      status: 'submitted',
-      submitted_at: new Date().toISOString()
-    })
+  try {
+    const { data, error } = await supabase
+      .from('bingo_claims')
+      .insert({
+        claim_ref: claimRef,
+        card_id: cid,
+        proof_code: proof,
+        claimant_name: name,
+        claimant_email: email,
+        winning_marks: marks,
+        card_file_name: fileName,
+        card_url: bucketUrl,
+        has_attachment: hasAttachment,
+        status: 'submitted',
+        submitted_at: new Date().toISOString()
+      })
 
-  if (error) {
-    console.error('Database insert error:', error)
-    throw new Error(`Failed to store claim in database: ${error.message}`)
+    if (error) {
+      // Provide specific error messages for common issues
+      if (error.code === '42P01') {
+        throw new Error(`Table 'bingo_claims' does not exist. Run the migration or disable database tracking.`)
+      } else if (error.code === '42501') {
+        throw new Error(`Permission denied. Check RLS policies on 'bingo_claims' table.`)
+      } else {
+        throw new Error(`Database error: ${error.message} (Code: ${error.code})`)
+      }
+    }
+
+    console.log(`✅ Claim stored in database: ${claimRef}`)
+    return data
+    
+  } catch (error) {
+    console.error('❌ Database operation failed:', error.message)
+    throw error
   }
-
-  console.log(`Claim stored in database: ${claimRef}`)
-  return data
 }
 
 /**

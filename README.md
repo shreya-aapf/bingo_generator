@@ -10,14 +10,17 @@ This system is **intentionally designed WITHOUT any database** - it's completely
 
 ## 📚 **Complete Documentation**
 
-**➡️ See [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md) for the full guide including:**
+**➡️ See [COMPREHENSIVE_GUIDE.md](COMPREHENSIVE_GUIDE.md) for the complete guide including:**
 
-- ✅ **System architecture and design**
 - ✅ **Step-by-step deployment guide** 
-- ✅ **Local testing instructions**
-- ✅ **Credential setup for your project (jnsfslmcowcefhpszrfx)**
-- ✅ **Troubleshooting and monitoring**
-- ✅ **Technical implementation details**
+- ✅ **Environment setup and configuration**
+- ✅ **Upload function testing methods**
+- ✅ **Direct cURL testing commands**
+- ✅ **Comprehensive troubleshooting guide**
+- ✅ **Debug tools and utilities**
+- ✅ **Pre-deployment checklist**
+
+**📖 For system architecture, see [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md)**
 
 ## 🚀 **Quick Start**
 
@@ -30,8 +33,6 @@ Your project is already configured for Supabase project: **jnsfslmcowcefhpszrfx*
 # 3. Deploy functions: supabase functions deploy
 # 4. Deploy frontend: cd public && vercel --prod
 ```
-
-👉 **See [CODESPACE_SETUP.md](CODESPACE_SETUP.md) for complete step-by-step guide**
 
 ### **Alternative: Local Setup**
 ```bash
@@ -54,4 +55,4 @@ cd public && vercel --prod
 
 ---
 
-**📖 For complete setup instructions, see [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md)**
+**📖 For complete setup, testing, and troubleshooting, see [COMPREHENSIVE_GUIDE.md](COMPREHENSIVE_GUIDE.md)**

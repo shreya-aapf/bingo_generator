@@ -621,35 +621,62 @@ class BingoCardGenerator {
     }
 
     /**
-     * Store user-card mapping in Supabase
+     * Store user-card mapping locally (privacy-first approach)
      */
     async storeUserCardMapping(cid, userName = null, userEmail = null) {
+        // Privacy-first: Store mapping locally only, no server tracking
+        const mapping = {
+            cid,
+            name: userName,
+            email: userEmail,
+            session_id: this.sessionId,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        };
+        
+        // Store in browser's local storage only (optional, for user convenience)
         try {
-            const response = await fetch(`${this.supabaseUrl}/functions/v1/store-user-card`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    cid,
-                    name: userName,
-                    email: userEmail,
-                    session_id: this.sessionId,
-                    user_agent: navigator.userAgent
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            const existingMappings = JSON.parse(localStorage.getItem('bingo_card_history') || '[]');
+            existingMappings.push(mapping);
+            
+            // Keep only last 10 cards to avoid storage bloat
+            if (existingMappings.length > 10) {
+                existingMappings.splice(0, existingMappings.length - 10);
             }
-
-            const result = await response.json();
-            console.log('User-card mapping stored:', result.mapping_id);
-            return result;
-
+            
+            localStorage.setItem('bingo_card_history', JSON.stringify(existingMappings));
+            console.log('✅ Card mapping stored locally (privacy-first):', cid);
+            
         } catch (error) {
-            console.error('Error storing user-card mapping:', error);
-            throw error;
+            // Local storage failed - not a critical error
+            console.log('ℹ️  Local storage unavailable, continuing without history tracking');
+        }
+        
+        return { success: true, stored_locally: true };
+    }
+
+    /**
+     * Get user's local card history (privacy-first)
+     */
+    getLocalCardHistory() {
+        try {
+            const history = JSON.parse(localStorage.getItem('bingo_card_history') || '[]');
+            return history;
+        } catch (error) {
+            console.log('Could not retrieve card history:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Clear local card history
+     */
+    clearLocalCardHistory() {
+        try {
+            localStorage.removeItem('bingo_card_history');
+            console.log('✅ Local card history cleared');
+        } catch (error) {
+            console.log('Could not clear card history:', error);
         }
     }
 
@@ -746,12 +773,31 @@ document.addEventListener('DOMContentLoaded', () => {
 // Service Worker registration for PWA capabilities (optional)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-                console.log('SW registration failed: ', registrationError);
-            });
+        // Try different paths for service worker
+        const swPaths = [
+            './sw.js',  // Relative path (preferred)
+            '/sw.js',   // Absolute path
+            'sw.js'     // Same directory
+        ];
+        
+        async function registerServiceWorker() {
+            for (const path of swPaths) {
+                try {
+                    const registration = await navigator.serviceWorker.register(path);
+                    console.log('✅ SW registered successfully:', registration);
+                    console.log('📁 SW path:', path);
+                    return; // Success, exit function
+                } catch (error) {
+                    console.log(`❌ SW registration failed for path "${path}":`, error.message);
+                    continue; // Try next path
+                }
+            }
+            
+            // If all paths failed, it's likely not needed for basic functionality
+            console.log('ℹ️  Service Worker registration failed - running without offline capabilities');
+            console.log('💡 This doesn\'t affect the core bingo functionality');
+        }
+        
+        registerServiceWorker();
     });
 }

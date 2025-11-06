@@ -1,0 +1,20 @@
+// Alternative: If you don't want service worker functionality at all,
+// replace the service worker registration code in app.js with this:
+
+// Service Worker registration disabled for simplicity
+// Uncomment below if you want to enable PWA capabilities later
+
+/*
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
+*/
+

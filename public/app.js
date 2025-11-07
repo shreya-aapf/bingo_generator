@@ -4,9 +4,7 @@
 class BingoCardGenerator {
     constructor() {
         this.currentCard = null;
-        // UPDATE THIS: Use your Supabase project URL and anon key
-        this.supabaseUrl = 'https://jnsfslmcowcefhpszrfx.supabase.co'; // Your Supabase project URL
-        this.supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'; // Supabase anon key
+        this.supabaseUrl = 'https://jnsfslmcowcefhpszrfx.supabase.co';
         this.sessionId = this.generateSessionId();
         this.init();
     }
@@ -301,9 +299,7 @@ class BingoCardGenerator {
             const response = await fetch(`${this.supabaseUrl}/functions/v1/generate-proof`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.supabaseAnonKey}`,
-                    'apikey': this.supabaseAnonKey
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ cid })
             });
@@ -521,9 +517,7 @@ class BingoCardGenerator {
             const response = await fetch(`${this.supabaseUrl}/functions/v1/upload-winning-card`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.supabaseAnonKey}`,
-                    'apikey': this.supabaseAnonKey
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
             });

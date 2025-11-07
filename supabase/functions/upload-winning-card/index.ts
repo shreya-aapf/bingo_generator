@@ -33,6 +33,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  console.log('📨 Incoming request:', req.method, req.url)
+  console.log('📋 Headers:', Object.fromEntries(req.headers.entries()))
+
   try {
     // Validate request method
     if (req.method !== 'POST') {

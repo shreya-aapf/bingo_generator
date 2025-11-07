@@ -5,13 +5,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 interface UploadWinningCardRequest {
-  cid: string
-  proof: string
   name: string
   email: string
-  marks: string[]
-  asset: string // base64 PNG
-  attachment?: string // optional base64 attachment
+  image: string // base64 image with data URI prefix
+  timestamp?: string
 }
 
 interface UploadWinningCardResponse {
@@ -49,11 +46,13 @@ serve(async (req) => {
     }
 
     // Parse and validate request
-    const { cid, proof, name, email, marks, asset, attachment }: UploadWinningCardRequest = await req.json()
+    const { name, email, image, timestamp }: UploadWinningCardRequest = await req.json()
 
-    if (!cid || !proof || !name || !email || !marks || !asset) {
+    console.log('Received claim submission:', { name, email, hasImage: !!image, timestamp })
+
+    if (!name || !email || !image) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ error: 'Missing required fields: name, email, and image are required' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -73,60 +72,7 @@ serve(async (req) => {
       )
     }
 
-    // Validate CID format (but allow special CLAIM- prefix for direct uploads)
-    if (!cid.startsWith('CLAIM-') && cid.length !== 12) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid CID format' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Get environment variables
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
-    const serverSecret = Deno.env.get('SERVER_SECRET')
-
-    if (!supabaseUrl || !supabaseAnonKey || !serverSecret) {
-      console.error('Missing required environment variables:', {
-        supabaseUrl: !!supabaseUrl,
-        supabaseAnonKey: !!supabaseAnonKey,
-        serverSecret: !!serverSecret
-      })
-      return new Response(
-        JSON.stringify({ 
-          error: 'Server configuration error',
-          details: 'Missing SUPABASE_URL, SUPABASE_ANON_KEY, or SERVER_SECRET'
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Create Supabase client with anon key (RLS disabled for simplicity)
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-    // Verify proof (skip for direct claim uploads)
-    if (!cid.startsWith('CLAIM-')) {
-      const expectedProof = await generateHMACProof(cid, serverSecret)
-      if (proof !== expectedProof) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid proof - card verification failed' }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        )
-      }
-    } else {
-      console.log('Direct claim upload detected - skipping proof verification')
-    }
-
-    // Validate that asset is an image file (accept PNG, JPEG, JPG, WEBP)
+    // Validate that image is a valid image file (accept PNG, JPEG, JPG, WEBP)
     const validImagePrefixes = [
       'data:image/png;base64,',
       'data:image/jpeg;base64,',
@@ -134,7 +80,7 @@ serve(async (req) => {
       'data:image/webp;base64,'
     ]
     
-    const isValidImage = validImagePrefixes.some(prefix => asset.startsWith(prefix))
+    const isValidImage = validImagePrefixes.some(prefix => image.startsWith(prefix))
     if (!isValidImage) {
       return new Response(
         JSON.stringify({ error: 'Only image files (PNG, JPEG, JPG, WEBP) are allowed' }),
@@ -145,50 +91,50 @@ serve(async (req) => {
       )
     }
 
+    // Get environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Missing required environment variables:', {
+        supabaseUrl: !!supabaseUrl,
+        supabaseAnonKey: !!supabaseAnonKey
+      })
+      return new Response(
+        JSON.stringify({ 
+          error: 'Server configuration error',
+          details: 'Missing SUPABASE_URL or SUPABASE_ANON_KEY'
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
     // Convert base64 to buffer for upload
-    const imageData = asset.split(',')[1] // Remove data URL prefix
+    const imageData = image.split(',')[1] // Remove data URI prefix
     const imageBuffer = Uint8Array.from(atob(imageData), c => c.charCodeAt(0))
     
     // Detect image type from data URI
-    const imageType = asset.split(';')[0].split('/')[1] // Extract 'png', 'jpeg', etc.
+    const imageType = image.split(';')[0].split('/')[1] // Extract 'png', 'jpeg', etc.
 
     // Generate claim reference
     const claimRef = generateClaimReference()
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage with name and email as metadata
     const uploadResult = await uploadWinningCardToBucket({
       supabase,
-      cid,
       claimRef,
       name,
       email,
-      marks,
       imageBuffer,
       imageType,
-      attachment
+      timestamp: timestamp || new Date().toISOString()
     })
-
-    // Store claim submission in database for easy tracking (optional)
-    const dbResult = await storeClaim({
-      supabase,
-      claimRef,
-      cid,
-      proof,
-      name,
-      email,
-      marks,
-      fileName: uploadResult.fileName,
-      bucketUrl: uploadResult.publicUrl,
-      hasAttachment: !!attachment
-    })
-    
-    if (!dbResult.stored) {
-      console.log('📁 File uploaded to storage successfully')
-      console.log(`ℹ️  Database tracking skipped: ${dbResult.message}`)
-    } else {
-      console.log('📁 File uploaded to storage successfully')
-      console.log('📊 Claim also stored in database')
-    }
 
     const response: UploadWinningCardResponse = {
       success: true,
@@ -197,7 +143,10 @@ serve(async (req) => {
       claimRef: claimRef
     }
 
-    console.log(`Winning card uploaded successfully for ${email}, CID: ${cid}, File: ${uploadResult.fileName}, Claim: ${claimRef}`)
+    console.log(`✅ Winning card uploaded successfully:`)
+    console.log(`   - Claimant: ${name} (${email})`)
+    console.log(`   - File: ${uploadResult.fileName}`)
+    console.log(`   - Claim Reference: ${claimRef}`)
 
     return new Response(
       JSON.stringify(response),
@@ -222,117 +171,48 @@ serve(async (req) => {
 })
 
 /**
- * Store claim submission in database table
- */
-async function storeClaim({
-  supabase,
-  claimRef,
-  cid,
-  proof,
-  name,
-  email,
-  marks,
-  fileName,
-  bucketUrl,
-  hasAttachment
-}: {
-  supabase: any
-  claimRef: string
-  cid: string
-  proof: string
-  name: string
-  email: string
-  marks: string[]
-  fileName: string
-  bucketUrl: string
-  hasAttachment: boolean
-}) {
-  try {
-    const { data, error } = await supabase
-      .from('bingo_claims')
-      .insert({
-        claim_ref: claimRef,
-        card_id: cid,
-        proof_code: proof,
-        claimant_name: name,
-        claimant_email: email,
-        winning_marks: marks,
-        card_file_name: fileName,
-        card_url: bucketUrl,
-        has_attachment: hasAttachment,
-        status: 'submitted',
-        submitted_at: new Date().toISOString()
-      })
-
-    if (error) {
-      // Handle database errors gracefully - database is optional for bingo game
-      if (error.code === '42P01') {
-        console.log(`ℹ️  Table 'bingo_claims' does not exist - skipping database storage (privacy-first mode)`)
-        return { stored: false, reason: 'table_missing', message: 'No database table (privacy-first)' }
-      } else if (error.code === '42501') {
-        console.log(`ℹ️  Database permissions issue - skipping database storage`)
-        return { stored: false, reason: 'permission_denied', message: 'Database permissions issue' }
-      } else {
-        console.log(`ℹ️  Database error - continuing without database: ${error.message}`)
-        return { stored: false, reason: 'database_error', message: error.message }
-      }
-    }
-
-    console.log(`✅ Claim stored in database: ${claimRef}`)
-    return { stored: true, data }
-    
-  } catch (error) {
-    console.log(`ℹ️  Database operation failed - continuing without database: ${error.message}`)
-    return { stored: false, reason: 'exception', message: error.message }
-  }
-}
-
-/**
  * Upload winning card to Supabase Storage bucket
+ * Name and email are stored as metadata in the image file itself
  */
 async function uploadWinningCardToBucket({
   supabase,
-  cid,
   claimRef,
   name,
   email,
-  marks,
   imageBuffer,
   imageType,
-  attachment
+  timestamp
 }: {
   supabase: any
-  cid: string
   claimRef: string
   name: string
   email: string
-  marks: string[]
   imageBuffer: Uint8Array
   imageType: string
-  attachment?: string
+  timestamp: string
 }) {
   // Generate filename with timestamp and claim reference
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const timestampForFile = timestamp.replace(/[:.]/g, '-')
   const fileExtension = imageType === 'jpeg' ? 'jpg' : imageType
-  const fileName = `winning-card-${cid}-${claimRef}-${timestamp}.${fileExtension}`
+  const fileName = `winning-card-${claimRef}-${timestampForFile}.${fileExtension}`
   
   // Determine content type
   const contentType = `image/${imageType}`
 
-  // Upload to the bingo_cards bucket with winning- prefix
+  console.log(`Uploading file: ${fileName} (${imageBuffer.length} bytes)`)
+
+  // Upload to the bingo_cards bucket with name and email as metadata
   const { data, error } = await supabase.storage
     .from('bingo_cards')
     .upload(fileName, imageBuffer, {
       contentType: contentType,
       metadata: {
-        type: 'winning_card',
-        cid: cid,
+        type: 'winning_claim',
         claimRef: claimRef,
-        name: name,
-        email: email,
-        marks: marks.join(','),
-        uploadedAt: new Date().toISOString(),
-        hasAttachment: attachment ? 'true' : 'false'
+        claimantName: name,
+        claimantEmail: email,
+        submittedAt: timestamp,
+        imageType: imageType
       }
     })
 
@@ -341,31 +221,7 @@ async function uploadWinningCardToBucket({
     throw new Error(`Failed to upload to storage: ${error.message}`)
   }
 
-  // If there's an attachment, upload it too
-  if (attachment) {
-    try {
-      const attachmentData = attachment.split(',')[1] // Remove data URL prefix
-      const attachmentBuffer = Uint8Array.from(atob(attachmentData), c => c.charCodeAt(0))
-      const attachmentFileName = `attachment-${cid}-${claimRef}-${timestamp}.jpg`
-      
-      await supabase.storage
-        .from('bingo_cards')
-        .upload(attachmentFileName, attachmentBuffer, {
-          contentType: 'image/jpeg',
-          metadata: {
-            type: 'claim_attachment',
-            cid: cid,
-            claimRef: claimRef,
-            relatedCard: fileName
-          }
-        })
-      
-      console.log(`Attachment uploaded: ${attachmentFileName}`)
-    } catch (attachmentError) {
-      console.warn('Failed to upload attachment:', attachmentError)
-      // Don't fail the whole request if attachment upload fails
-    }
-  }
+  console.log('✅ File uploaded successfully to storage')
 
   // Get public URL for the uploaded file
   const { data: publicUrlData } = supabase.storage
@@ -383,62 +239,7 @@ async function uploadWinningCardToBucket({
  * Generate a unique claim reference
  */
 function generateClaimReference(): string {
-  const timestamp = Date.now().toString(36)
+  const timestamp = Date.now().toString(36).toUpperCase()
   const randomPart = Math.random().toString(36).substr(2, 6).toUpperCase()
   return `CLAIM-${timestamp}-${randomPart}`
-}
-
-/**
- * Generate HMAC-SHA256 proof for CID (same as generate-proof function)
- */
-async function generateHMACProof(cid: string, secret: string): Promise<string> {
-  const encoder = new TextEncoder()
-  
-  // Import secret key
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-  
-  // Generate HMAC
-  const signature = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    encoder.encode(cid)
-  )
-  
-  // Convert to base32 and truncate to 10 chars
-  const hashArray = Array.from(new Uint8Array(signature))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-  const base32 = toBase32(hashHex).substring(0, 10)
-  
-  return base32
-}
-
-/**
- * Convert hex string to base32
- */
-function toBase32(hex: string): string {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-  let binary = ''
-  
-  // Convert hex to binary
-  for (let i = 0; i < hex.length; i += 2) {
-    const hexPair = hex.substr(i, 2)
-    const decimal = parseInt(hexPair, 16)
-    binary += decimal.toString(2).padStart(8, '0')
-  }
-  
-  // Convert binary to base32
-  let base32 = ''
-  for (let i = 0; i < binary.length; i += 5) {
-    const chunk = binary.substr(i, 5).padEnd(5, '0')
-    const index = parseInt(chunk, 2)
-    base32 += alphabet[index]
-  }
-  
-  return base32
 }

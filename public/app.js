@@ -496,28 +496,20 @@ class BingoCardGenerator {
             const winningCardData = await this.fileToBase64(winningCard);
             console.log('Base64 conversion completed, length:', winningCardData.length);
 
-            // Generate a temporary CID and proof for the claim (since user didn't generate card)
-            const tempCid = 'CLAIM-' + Date.now().toString(36).toUpperCase();
-            const tempProof = 'DIRECT-CLAIM';
-
             const payload = {
-                cid: tempCid,
-                proof: tempProof,
                 name: name,
                 email: email,
-                marks: [], // Empty marks array since user uploaded their own card
-                asset: winningCardData
+                image: winningCardData,
+                timestamp: new Date().toISOString()
             };
 
             console.log('====== ACTUAL PAYLOAD BEING SENT ======');
             console.log('Full payload object (without base64 data for readability):');
             console.log({
-                cid: payload.cid,
-                proof: payload.proof,
                 name: payload.name,
                 email: payload.email,
-                marks: payload.marks,
-                asset: '(base64 data - length: ' + payload.asset.length + ' chars)'
+                image: '(base64 data - length: ' + payload.image.length + ' chars)',
+                timestamp: payload.timestamp
             });
             console.log('Payload keys:', Object.keys(payload));
             console.log('========================================');

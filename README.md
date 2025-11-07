@@ -10,9 +10,7 @@ This system is **intentionally designed WITHOUT any database** - it's completely
 
 ## 📚 **Documentation**
 
-- **📖 [COMPREHENSIVE_GUIDE.md](COMPREHENSIVE_GUIDE.md)** - Complete setup, testing & troubleshooting
-- **🏗️ [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md)** - System architecture & technical details  
-- **📁 [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Clean file organization & what was removed
+- **🚀 [SETUP_GUIDE.md](SETUP_GUIDE.md)** - Complete setup, architecture, and troubleshooting guide
 
 ### **🧪 Testing Tools**
 - `test-proof-generator.js` - Generate valid test payloads

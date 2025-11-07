@@ -13,6 +13,7 @@ class BingoCardGenerator {
 
     init() {
         this.bindEvents();
+        this.setupUploadHandlers();
         this.showStatus('Ready to generate your first bingo card!', 'info');
     }
 
@@ -757,6 +758,91 @@ class BingoCardGenerator {
         setTimeout(() => {
             this.dismissMessage(messageEl);
         }, 3000);
+    }
+
+    /**
+     * Set up PNG upload handlers
+     */
+    setupUploadHandlers() {
+        const fileInput = document.getElementById('pngUpload');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const preview = document.getElementById('uploadPreview');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type === 'image/png') {
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    fileName.textContent = file.name;
+                    preview.style.display = 'block';
+                    uploadBtn.style.display = 'inline-flex';
+                };
+                reader.readAsDataURL(file);
+                this.selectedFile = file;
+            } else {
+                this.showStatus('Please select a PNG file only.', 'error');
+                this.resetUpload();
+            }
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            if (this.selectedFile) {
+                this.uploadPNG(this.selectedFile);
+            }
+        });
+    }
+
+    /**
+     * Reset upload interface
+     */
+    resetUpload() {
+        document.getElementById('pngUpload').value = '';
+        document.getElementById('uploadPreview').style.display = 'none';
+        document.getElementById('uploadBtn').style.display = 'none';
+        this.selectedFile = null;
+    }
+
+    /**
+     * Upload PNG file to storage
+     */
+    async uploadPNG(file) {
+        try {
+            this.showStatus('Uploading PNG to cloud...', 'info');
+            
+            const formData = new FormData();
+            formData.append('png_file', file);
+
+            const response = await fetch(`${this.supabaseUrl}/functions/v1/upload-winning-card`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showStatus(`PNG uploaded successfully! File saved to cloud.`, 'success');
+                console.log('File URL:', result.file_url);
+                
+                // Reset upload interface after successful upload
+                setTimeout(() => {
+                    this.resetUpload();
+                }, 2000);
+            } else {
+                throw new Error(result.message || 'Upload failed');
+            }
+
+        } catch (error) {
+            console.error('Error uploading PNG:', error);
+            this.showStatus(`Upload failed: ${error.message}`, 'error');
+        }
     }
 
     /**

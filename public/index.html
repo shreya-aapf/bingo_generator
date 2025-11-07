@@ -117,12 +117,6 @@
                             <li><strong>Multiple Patterns:</strong> You can win with more than one pattern on the same card</li>
                             <li><strong>Share the Fun:</strong> Each person gets their own unique card, so everyone can play!</li>
                         </ul>
-
-                        <div class="debug-section">
-                            <h4>🔧 Having Issues?</h4>
-                            <p>If you're experiencing upload problems, click this button to test the connection:</p>
-                            <button id="testConnection" class="btn btn-secondary">Test Upload Service</button>
-                        </div>
                         
                         <div class="privacy-note">
                             <h4>🛡️ Your Privacy Matters</h4>
@@ -165,6 +159,25 @@
                         <p>This card will disappear if you refresh or close this page. Save it immediately!</p>
                     </div>
                     <button id="downloadPng" class="btn btn-download">📸 Download PNG Now</button>
+                    
+                    <!-- PNG Upload Section -->
+                    <div class="upload-section" style="margin-top: 2rem;">
+                        <h3>📤 Upload Your PNG</h3>
+                        <p>Upload your bingo card PNG to save it in the cloud</p>
+                        <div class="upload-controls">
+                            <input type="file" id="pngUpload" accept="image/png" style="display: none;">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('pngUpload').click();">
+                                📁 Choose PNG File
+                            </button>
+                            <button type="button" id="uploadBtn" class="btn btn-secondary" style="display: none;">
+                                ☁️ Save to Cloud
+                            </button>
+                        </div>
+                        <div id="uploadPreview" class="upload-preview" style="display: none;">
+                            <img id="previewImage" alt="Preview" style="max-width: 100%; max-height: 200px; border: 2px solid var(--border); border-radius: 8px;">
+                            <p id="fileName" class="file-name"></p>
+                        </div>
+                    </div>
                 </div>
             </section>
 

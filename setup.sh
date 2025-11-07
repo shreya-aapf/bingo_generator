@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Privacy-First Bingo Card Generator - Quick Setup Script
+#   Bingo Card Generator - Quick Setup Script
 # This script helps automate the initial setup process
 
 set -e  # Exit on any error
 
-echo "🎯 Privacy-First Bingo Card Generator - Setup Script"
+echo "🎯   Bingo Card Generator - Setup Script"
 echo "=================================================="
 echo ""
 

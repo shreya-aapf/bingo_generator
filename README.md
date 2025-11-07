@@ -1,12 +1,12 @@
-# 🎯 Privacy-First Bingo Card Generator
+# 🎯 Bingo Card Generator
 
-A serverless, privacy-first web application for generating cryptographically verifiable bingo cards using Supabase Edge Functions.
+A serverless, web application for generating cryptographically verifiable bingo cards using Supabase Edge Functions.
 
-![Bingo Card Generator](https://img.shields.io/badge/Privacy-First-green) ![Serverless](https://img.shields.io/badge/Serverless-Supabase-blue) ![No Database](https://img.shields.io/badge/Database-None-red)
+![Bingo Card Generator](https://img.shields.io/badge/ -green) ![Serverless](https://img.shields.io/badge/Serverless-Supabase-blue) ![No Database](https://img.shields.io/badge/Database-None-red)
 
 ## 🚨 **No Database Required!**
 
-This system is **intentionally designed WITHOUT any database** - it's completely privacy-first and stateless.
+This system is **intentionally designed WITHOUT any database** - it's completely   and stateless.
 
 ## 📚 **Documentation**
 

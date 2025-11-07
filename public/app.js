@@ -1,4 +1,4 @@
-// Privacy-First Bingo Card Generator
+//   Bingo Card Generator
 // Frontend Application Logic
 
 class BingoCardGenerator {
@@ -584,10 +584,10 @@ class BingoCardGenerator {
     }
 
     /**
-     * Store user-card mapping locally (privacy-first approach)
+     * Store user-card mapping locally (  approach)
      */
     async storeUserCardMapping(cid, userName = null, userEmail = null) {
-        // Privacy-first: Store mapping locally only, no server tracking
+        //  : Store mapping locally only, no server tracking
         const mapping = {
             cid,
             name: userName,
@@ -608,7 +608,7 @@ class BingoCardGenerator {
             }
             
             localStorage.setItem('bingo_card_history', JSON.stringify(existingMappings));
-            console.log('✅ Card mapping stored locally (privacy-first):', cid);
+            console.log('✅ Card mapping stored locally ( ):', cid);
             
         } catch (error) {
             // Local storage failed - not a critical error
@@ -619,7 +619,7 @@ class BingoCardGenerator {
     }
 
     /**
-     * Get user's local card history (privacy-first)
+     * Get user's local card history ( )
      */
     getLocalCardHistory() {
         try {

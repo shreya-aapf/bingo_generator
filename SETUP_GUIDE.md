@@ -218,4 +218,4 @@ FOR SELECT USING (bucket_id = 'bingo_cards');
 - **Client-side rendering** for fast load times
 - **Image optimization** for PNG downloads
 
-This setup provides a complete, privacy-first bingo system with modern styling and cloud integration!
+This setup provides a complete,   bingo system with modern styling and cloud integration!

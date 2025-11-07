@@ -1,4 +1,4 @@
-// Service Worker for Privacy-First Bingo Card Generator
+// Service Worker for   Bingo Card Generator
 // Provides offline functionality and PWA capabilities
 
 const CACHE_NAME = 'bingo-cards-v2';

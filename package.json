@@ -1,7 +1,7 @@
 {
-  "name": "privacy-first-bingo-generator",
+  "name": "bingo-generator",
   "version": "1.0.0",
-  "description": "A serverless, privacy-first web application for generating cryptographically verifiable bingo cards using Supabase Edge Functions. Zero database storage, complete privacy protection.",
+  "description": "A serverless, web application for generating cryptographically verifiable bingo cards using Supabase Edge Functions. Zero database storage, complete privacy protection.",
   "main": "public/index.html",
   "scripts": {
     "start": "cd public && python -m http.server 3000",
@@ -15,7 +15,7 @@
   },
   "keywords": [
     "bingo",
-    "privacy-first",
+    " ",
     "serverless",
     "supabase",
     "edge-functions",
@@ -29,12 +29,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/privacy-first-bingo.git"
+    "url": "git+https://github.com/yourusername/ -bingo.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/privacy-first-bingo/issues"
+    "url": "https://github.com/yourusername/ -bingo/issues"
   },
-  "homepage": "https://github.com/yourusername/privacy-first-bingo#readme",
+  "homepage": "https://github.com/yourusername/ -bingo#readme",
   "documentation": "COMPLETE_DOCUMENTATION.md",
   "devDependencies": {
     "netlify-cli": "^17.0.0",

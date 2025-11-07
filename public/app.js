@@ -4,7 +4,6 @@
 class BingoCardGenerator {
     constructor() {
         this.currentCard = null;
-        this.markedSquares = new Set();
         // UPDATE THIS: Use your Supabase project URL
         this.supabaseUrl = 'https://jnsfslmcowcefhpszrfx.supabase.co'; // Your Supabase project URL
         this.sessionId = this.generateSessionId();
@@ -13,7 +12,6 @@ class BingoCardGenerator {
 
     init() {
         this.bindEvents();
-        this.setupUploadHandlers();
         this.showStatus('Ready to generate your first bingo card!', 'info');
     }
 
@@ -34,10 +32,21 @@ class BingoCardGenerator {
             this.submitClaim();
         });
 
-        // Test connection button
-        document.getElementById('testConnection').addEventListener('click', () => {
-            this.testConnectionAndReport();
+        // Winning card upload preview
+        document.getElementById('winningCardUpload').addEventListener('change', (e) => {
+            console.log('File input changed, files:', e.target.files);
+            this.previewWinningCard(e.target.files[0]);
         });
+
+        // Add input event listeners for debugging
+        document.getElementById('claimName').addEventListener('input', (e) => {
+            console.log('Name field changed:', e.target.value);
+        });
+
+        document.getElementById('claimEmail').addEventListener('input', (e) => {
+            console.log('Email field changed:', e.target.value);
+        });
+
     }
 
     /**
@@ -71,9 +80,6 @@ class BingoCardGenerator {
                 // Don't show error to user as this is background functionality
             });
 
-            // Reset marked squares
-            this.markedSquares.clear();
-            
             // Render the card
             this.renderCard();
             
@@ -83,8 +89,6 @@ class BingoCardGenerator {
             
             // Show action sections
             document.getElementById('downloadSection').classList.remove('hidden');
-            document.getElementById('claimFormContainer').classList.remove('hidden');
-            document.getElementById('claimPlaceholder').classList.add('hidden');
             document.getElementById('arcadeBackground').classList.remove('hidden');
             
             this.showStatus(`Card ${cid} generated! 🚨 DOWNLOAD IT NOW - don't wait!`, 'success');
@@ -350,9 +354,6 @@ class BingoCardGenerator {
                 // Mark FREE space
                 if (value === 'FREE') {
                     cell.classList.add('free');
-                } else {
-                    // Add click handler for marking
-                    cell.addEventListener('click', () => this.toggleSquare(row, col, cell));
                 }
                 
                 gridElement.appendChild(cell);
@@ -367,35 +368,6 @@ class BingoCardGenerator {
         cardElement.classList.remove('hidden');
     }
 
-    /**
-     * Toggle square marking for claim submission
-     */
-    toggleSquare(row, col, cellElement) {
-        const squareId = `${row}-${col}`;
-        
-        if (this.markedSquares.has(squareId)) {
-            this.markedSquares.delete(squareId);
-            cellElement.classList.remove('marked');
-        } else {
-            this.markedSquares.add(squareId);
-            cellElement.classList.add('marked');
-        }
-        
-        this.updateMarkedSquaresDisplay();
-    }
-
-    /**
-     * Update the display of marked squares
-     */
-    updateMarkedSquaresDisplay() {
-        const display = document.getElementById('markedSquares');
-        if (this.markedSquares.size === 0) {
-            display.textContent = 'No squares marked';
-        } else {
-            const squares = Array.from(this.markedSquares).join(', ');
-            display.textContent = `Marked: ${squares}`;
-        }
-    }
 
 
     /**
@@ -426,17 +398,11 @@ class BingoCardGenerator {
 
             const cardImage = await this.generateCardImage();
             
-            // Include markings info in filename if any squares are marked
-            const hasMarkings = this.markedSquares.size > 0;
-            const suffix = hasMarkings ? '-with-markings' : '';
-            const filename = `bingo-card-${this.currentCard.cid}${suffix}.png`;
+            const filename = `bingo-card-${this.currentCard.cid}.png`;
             
             this.downloadBlob(cardImage, filename, 'image/png');
 
-            const statusMsg = hasMarkings 
-                ? 'PNG downloaded with your markings!' 
-                : 'PNG downloaded successfully!';
-            this.showStatus(statusMsg, 'success');
+            this.showStatus('PNG downloaded successfully!', 'success');
 
         } catch (error) {
             console.error('Error downloading card:', error);
@@ -457,129 +423,151 @@ class BingoCardGenerator {
     }
 
     /**
-     * Upload winning card to bucket
+     * Submit winning claim with uploaded card
      */
     async submitClaim() {
-        if (!this.currentCard) {
-            this.showStatus('No card to claim. Generate a card first.', 'error');
+        console.log('=== FORM SUBMISSION STARTED ===');
+        
+        // Check if elements exist
+        const nameElement = document.getElementById('claimName');
+        const emailElement = document.getElementById('claimEmail');
+        const fileElement = document.getElementById('winningCardUpload');
+        
+        console.log('Form elements found:', {
+            nameElement: !!nameElement,
+            emailElement: !!emailElement,
+            fileElement: !!fileElement
+        });
+        
+        if (!nameElement || !emailElement || !fileElement) {
+            console.error('Missing form elements!');
+            this.showStatus('Form error: Missing input fields. Please refresh the page.', 'error');
             return;
         }
 
-        const name = document.getElementById('claimName').value;
-        const email = document.getElementById('claimEmail').value;
-        const attachment = document.getElementById('claimAttachment').files[0];
+        const name = nameElement.value.trim();
+        const email = emailElement.value.trim();
+        const winningCard = fileElement.files[0];
 
-        if (!name || !email) {
-            this.showStatus('Please fill in your name and email.', 'error');
+        // Detailed logging of what we captured
+        console.log('=== FORM VALUES CAPTURED ===');
+        console.log('Name:', name, '(length:', name.length, ')');
+        console.log('Email:', email, '(length:', email.length, ')');
+        console.log('File:', winningCard ? {
+            name: winningCard.name,
+            size: winningCard.size,
+            type: winningCard.type
+        } : 'NO FILE SELECTED');
+        console.log('Files array:', fileElement.files);
+        console.log('Files array length:', fileElement.files.length);
+
+        // Validate required fields with detailed feedback
+        if (!name || name.length === 0) {
+            console.error('Validation failed: Name is empty');
+            this.showStatus('❌ Please enter your full name in the form.', 'error');
             return;
         }
 
-        if (this.markedSquares.size === 0) {
-            this.showStatus('Please mark your winning squares on the card.', 'error');
+        if (!email || email.length === 0) {
+            console.error('Validation failed: Email is empty');
+            this.showStatus('❌ Please enter your email address in the form.', 'error');
             return;
         }
 
-        // Validate bingo
-        if (!this.validateBingo()) {
-            this.showStatus('The marked squares do not form a valid bingo. Please check your selection.', 'error');
+        if (!winningCard) {
+            console.error('Validation failed: No file selected');
+            this.showStatus('❌ Please upload your winning bingo card photo.', 'error');
             return;
         }
+
+        console.log('✅ All validations passed, proceeding with submission...');
 
         try {
-            this.showStatus('Uploading winning card to bucket...', 'info');
+            this.showStatus('Submitting your winning claim...', 'info');
             
-            // Debug information
-            console.log('Upload details:', {
-                supabaseUrl: this.supabaseUrl,
-                cid: this.currentCard.cid,
-                proof: this.currentCard.proof,
-                markedSquares: Array.from(this.markedSquares),
-                name,
-                email
-            });
-
-            // Generate card image with markings
-            const cardImage = await this.generateCardImage();
-
-            // Prepare attachment if present
-            let attachmentData = null;
-            if (attachment) {
-                attachmentData = await this.fileToBase64(attachment);
+            // Validate file size (max 10MB)
+            if (winningCard.size > 10 * 1024 * 1024) {
+                this.showStatus('Image file is too large. Please choose a file smaller than 10MB.', 'error');
+                return;
             }
 
-            // Upload winning card to Supabase bucket
+            // Convert winning card to base64
+            console.log('Converting file to base64:', winningCard.name, winningCard.size, winningCard.type);
+            const winningCardData = await this.fileToBase64(winningCard);
+            console.log('Base64 conversion completed, length:', winningCardData.length);
+
+            // Generate a temporary CID and proof for the claim (since user didn't generate card)
+            const tempCid = 'CLAIM-' + Date.now().toString(36).toUpperCase();
+            const tempProof = 'DIRECT-CLAIM';
+
+            const payload = {
+                cid: tempCid,
+                proof: tempProof,
+                name: name,
+                email: email,
+                marks: [], // Empty marks array since user uploaded their own card
+                asset: winningCardData
+            };
+
+            console.log('====== ACTUAL PAYLOAD BEING SENT ======');
+            console.log('Full payload object (without base64 data for readability):');
+            console.log({
+                cid: payload.cid,
+                proof: payload.proof,
+                name: payload.name,
+                email: payload.email,
+                marks: payload.marks,
+                asset: '(base64 data - length: ' + payload.asset.length + ' chars)'
+            });
+            console.log('Payload keys:', Object.keys(payload));
+            console.log('========================================');
+
+            // Submit claim to Supabase
             const response = await fetch(`${this.supabaseUrl}/functions/v1/upload-winning-card`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    cid: this.currentCard.cid,
-                    proof: this.currentCard.proof,
-                    name,
-                    email,
-                    marks: Array.from(this.markedSquares),
-                    asset: cardImage,
-                    attachment: attachmentData
-                })
+                body: JSON.stringify(payload)
             });
 
+            console.log('Response status:', response.status, response.statusText);
+
             if (!response.ok) {
-                // Try to get detailed error message from response
-                let errorMessage = `HTTP ${response.status}`;
+                let errorData = {};
                 try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || errorMessage;
-                    if (errorData.details) {
-                        errorMessage += ` - ${errorData.details}`;
-                    }
+                    errorData = await response.json();
+                    console.log('Error response data:', errorData);
                 } catch (e) {
-                    // If we can't parse the response, use status text
-                    errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    console.log('Could not parse error response as JSON');
                 }
+                const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
                 throw new Error(errorMessage);
             }
 
             const result = await response.json();
+            console.log('Success response:', result);
             
-            // Check if the response indicates success
             if (result.error) {
                 throw new Error(result.error);
             }
             
-            this.showStatus(`Winning card uploaded successfully! File: ${result.fileName}`, 'success');
-            
-            // Optionally show the public URL
-            if (result.bucketUrl) {
-                console.log('Winning card available at:', result.bucketUrl);
+            this.showStatus(`🎉 Winning claim submitted successfully! We'll be in touch soon.`, 'success');
+
+            // Clear form and preview
+            document.getElementById('claimForm').reset();
+            const cardPreview = document.getElementById('cardPreview');
+            if (cardPreview) {
+                cardPreview.style.display = 'none';
             }
 
-            // Clear form
-            document.getElementById('claimForm').reset();
-            this.markedSquares.clear();
-            this.updateMarkedSquaresDisplay();
-            this.renderCard(); // Refresh to remove markings
-
         } catch (error) {
-            console.error('Error uploading winning card:', error);
+            console.error('Error submitting claim:', error);
             
-            // Show more specific error messages based on the error
-            let userMessage = 'Failed to upload winning card. ';
+            let userMessage = 'Failed to submit winning claim. ';
             
-            if (error.message.includes('Server configuration error')) {
-                userMessage += 'Server setup incomplete - contact administrator.';
-            } else if (error.message.includes('Invalid proof')) {
-                userMessage += 'Card verification failed - try generating a new card.';
-            } else if (error.message.includes('Only PNG files are allowed')) {
-                userMessage += 'Invalid file format detected.';
-            } else if (error.message.includes('Failed to upload to storage')) {
-                userMessage += 'Storage service unavailable - try again later.';
-            } else if (error.message.includes('HTTP 404')) {
-                userMessage += 'Upload service not found - check configuration.';
-            } else if (error.message.includes('HTTP 500')) {
+            if (error.message.includes('HTTP 500')) {
                 userMessage += 'Server error - please try again or contact support.';
-            } else if (error.message.includes('CORS')) {
-                userMessage += 'Network configuration issue - contact administrator.';
             } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
                 userMessage += 'Network connection failed - check your internet connection.';
             } else {
@@ -590,33 +578,6 @@ class BingoCardGenerator {
         }
     }
 
-    /**
-     * Validate if marked squares form a valid bingo
-     */
-    validateBingo() {
-        const squares = Array.from(this.markedSquares).map(s => s.split('-').map(n => parseInt(n)));
-        
-        // Check rows
-        for (let row = 0; row < 5; row++) {
-            const rowSquares = squares.filter(s => s[0] === row);
-            if (rowSquares.length === 5) return true;
-        }
-        
-        // Check columns
-        for (let col = 0; col < 5; col++) {
-            const colSquares = squares.filter(s => s[1] === col);
-            if (colSquares.length === 5) return true;
-        }
-        
-        // Check diagonals
-        const diagonal1 = squares.filter(s => s[0] === s[1]);
-        if (diagonal1.length === 5) return true;
-        
-        const diagonal2 = squares.filter(s => s[0] + s[1] === 4);
-        if (diagonal2.length === 5) return true;
-        
-        return false;
-    }
 
     /**
      * Convert file to base64
@@ -690,53 +651,6 @@ class BingoCardGenerator {
         }
     }
 
-    /**
-     * Test connection and report results to user
-     */
-    async testConnectionAndReport() {
-        this.showStatus('Testing upload service connection...', 'info');
-        
-        try {
-            const isConnected = await this.testUploadService();
-            
-            if (isConnected) {
-                this.showStatus('✅ Upload service is reachable! Connection test passed.', 'success');
-            } else {
-                this.showStatus('❌ Upload service connection failed. Check your Supabase URL or network connection.', 'error');
-            }
-            
-        } catch (error) {
-            this.showStatus('❌ Connection test failed: Network error or invalid URL.', 'error');
-        }
-    }
-
-    /**
-     * Test connection to the upload service
-     */
-    async testUploadService() {
-        try {
-            console.log('Testing upload service connectivity...');
-            
-            const response = await fetch(`${this.supabaseUrl}/functions/v1/upload-winning-card`, {
-                method: 'OPTIONS',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            console.log('Upload service test response:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Object.fromEntries(response.headers.entries())
-            });
-            
-            return response.ok;
-            
-        } catch (error) {
-            console.error('Upload service test failed:', error);
-            return false;
-        }
-    }
 
     /**
      * Show status message to user
@@ -761,89 +675,48 @@ class BingoCardGenerator {
     }
 
     /**
-     * Set up PNG upload handlers
+     * Preview uploaded winning card
      */
-    setupUploadHandlers() {
-        const fileInput = document.getElementById('pngUpload');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const preview = document.getElementById('uploadPreview');
-        const previewImage = document.getElementById('previewImage');
-        const fileName = document.getElementById('fileName');
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && file.type === 'image/png') {
-                // Show preview
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    previewImage.src = e.target.result;
-                    fileName.textContent = file.name;
-                    preview.style.display = 'block';
-                    uploadBtn.style.display = 'inline-flex';
-                };
-                reader.readAsDataURL(file);
-                this.selectedFile = file;
-            } else {
-                this.showStatus('Please select a PNG file only.', 'error');
-                this.resetUpload();
-            }
-        });
-
-        uploadBtn.addEventListener('click', () => {
-            if (this.selectedFile) {
-                this.uploadPNG(this.selectedFile);
-            }
-        });
-    }
-
-    /**
-     * Reset upload interface
-     */
-    resetUpload() {
-        document.getElementById('pngUpload').value = '';
-        document.getElementById('uploadPreview').style.display = 'none';
-        document.getElementById('uploadBtn').style.display = 'none';
-        this.selectedFile = null;
-    }
-
-    /**
-     * Upload PNG file to storage
-     */
-    async uploadPNG(file) {
-        try {
-            this.showStatus('Uploading PNG to cloud...', 'info');
-            
-            const formData = new FormData();
-            formData.append('png_file', file);
-
-            const response = await fetch(`${this.supabaseUrl}/functions/v1/upload-winning-card`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            
-            if (result.success) {
-                this.showStatus(`PNG uploaded successfully! File saved to cloud.`, 'success');
-                console.log('File URL:', result.file_url);
-                
-                // Reset upload interface after successful upload
-                setTimeout(() => {
-                    this.resetUpload();
-                }, 2000);
-            } else {
-                throw new Error(result.message || 'Upload failed');
-            }
-
-        } catch (error) {
-            console.error('Error uploading PNG:', error);
-            this.showStatus(`Upload failed: ${error.message}`, 'error');
+    previewWinningCard(file) {
+        console.log('previewWinningCard called with:', file);
+        
+        if (!file) {
+            console.log('No file provided to preview');
+            return;
         }
+
+        if (!file.type.startsWith('image/')) {
+            console.error('Invalid file type:', file.type);
+            this.showStatus('❌ Please select an image file (JPG, PNG, etc.).', 'error');
+            return;
+        }
+
+        console.log('✅ Valid image file, creating preview...');
+
+        const preview = document.getElementById('cardPreview');
+        const previewImage = document.getElementById('cardPreviewImage');
+        const fileName = document.getElementById('cardFileName');
+
+        if (!preview || !previewImage || !fileName) {
+            console.error('Preview elements not found');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            console.log('✅ File read successfully, showing preview');
+            previewImage.src = e.target.result;
+            fileName.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+            preview.style.display = 'block';
+            this.showStatus('✅ Image uploaded successfully!', 'success');
+        };
+        reader.onerror = (e) => {
+            console.error('Error reading file:', e);
+            this.showStatus('❌ Error reading file. Please try again.', 'error');
+        };
+        reader.readAsDataURL(file);
     }
+
 
     /**
      * Dismiss status message with animation

@@ -73,8 +73,8 @@ serve(async (req) => {
       )
     }
 
-    // Validate CID format
-    if (cid.length !== 12) {
+    // Validate CID format (but allow special CLAIM- prefix for direct uploads)
+    if (!cid.startsWith('CLAIM-') && cid.length !== 12) {
       return new Response(
         JSON.stringify({ error: 'Invalid CID format' }),
         { 
@@ -110,22 +110,34 @@ serve(async (req) => {
     // Create Supabase client with anon key (RLS disabled for simplicity)
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-    // Verify proof
-    const expectedProof = await generateHMACProof(cid, serverSecret)
-    if (proof !== expectedProof) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid proof - card verification failed' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
+    // Verify proof (skip for direct claim uploads)
+    if (!cid.startsWith('CLAIM-')) {
+      const expectedProof = await generateHMACProof(cid, serverSecret)
+      if (proof !== expectedProof) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid proof - card verification failed' }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        )
+      }
+    } else {
+      console.log('Direct claim upload detected - skipping proof verification')
     }
 
-    // Validate that asset is a PNG file
-    if (!asset.startsWith('data:image/png;base64,')) {
+    // Validate that asset is an image file (accept PNG, JPEG, JPG, WEBP)
+    const validImagePrefixes = [
+      'data:image/png;base64,',
+      'data:image/jpeg;base64,',
+      'data:image/jpg;base64,',
+      'data:image/webp;base64,'
+    ]
+    
+    const isValidImage = validImagePrefixes.some(prefix => asset.startsWith(prefix))
+    if (!isValidImage) {
       return new Response(
-        JSON.stringify({ error: 'Only PNG files are allowed' }),
+        JSON.stringify({ error: 'Only image files (PNG, JPEG, JPG, WEBP) are allowed' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -136,6 +148,9 @@ serve(async (req) => {
     // Convert base64 to buffer for upload
     const imageData = asset.split(',')[1] // Remove data URL prefix
     const imageBuffer = Uint8Array.from(atob(imageData), c => c.charCodeAt(0))
+    
+    // Detect image type from data URI
+    const imageType = asset.split(';')[0].split('/')[1] // Extract 'png', 'jpeg', etc.
 
     // Generate claim reference
     const claimRef = generateClaimReference()
@@ -149,6 +164,7 @@ serve(async (req) => {
       email,
       marks,
       imageBuffer,
+      imageType,
       attachment
     })
 
@@ -282,6 +298,7 @@ async function uploadWinningCardToBucket({
   email,
   marks,
   imageBuffer,
+  imageType,
   attachment
 }: {
   supabase: any
@@ -291,17 +308,22 @@ async function uploadWinningCardToBucket({
   email: string
   marks: string[]
   imageBuffer: Uint8Array
+  imageType: string
   attachment?: string
 }) {
   // Generate filename with timestamp and claim reference
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-  const fileName = `winning-card-${cid}-${claimRef}-${timestamp}.png`
+  const fileExtension = imageType === 'jpeg' ? 'jpg' : imageType
+  const fileName = `winning-card-${cid}-${claimRef}-${timestamp}.${fileExtension}`
+  
+  // Determine content type
+  const contentType = `image/${imageType}`
 
   // Upload to the bingo_cards bucket with winning- prefix
   const { data, error } = await supabase.storage
     .from('bingo_cards')
     .upload(fileName, imageBuffer, {
-      contentType: 'image/png',
+      contentType: contentType,
       metadata: {
         type: 'winning_card',
         cid: cid,

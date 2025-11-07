@@ -6,7 +6,7 @@
     <title>Privacy-First Bingo Card Generator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -87,40 +87,31 @@
                     <h2>🎯 Let's Play Bingo!</h2>
                     <div class="instructions-content">
                         <h3>🎮 Here's How It Works</h3>
-                        <p>Ready to join the fun? Here's your game plan:</p>
                         <ol>
                             <li><strong>Get Your Card:</strong> Hit "Generate New Card" and we'll create a unique bingo card just for you!</li>
                             <li><strong>Save It Right Away:</strong> <em>Super important!</em> Download your card as PNG immediately - don't wait! If you refresh the page or close your browser, your card will be gone forever.</li>
-                            <li><strong>Print or Save:</strong> Keep that downloaded image handy on your phone, print it out, or save it somewhere safe</li>
                             <li><strong>Play During the Event:</strong> As you experience activities that match your squares, mark them off on your saved copy</li>
                             <li><strong>Win Big:</strong> Complete any full row, column, or diagonal and you've got a winner!</li>
                         </ol>
                         
                         <h3>🏆 Ready to Claim Your Prize?</h3>
-                        <p>Got a winning pattern? Awesome! Here's what to do:</p>
                         <ol>
-                            <li><strong>Come Back Here:</strong> Generate the same card again (your Card ID ensures it's identical)</li>
-                            <li><strong>Mark Your Wins:</strong> Click the squares on the screen that match your winning pattern</li>
-                            <li><strong>Fill the Form:</strong> Add your name, email, and any photos you took as proof</li>
+                            <li><strong>Come Back Here:</strong> Navigate to this page again</li>
+                            <li><strong>Fill the Claims Form:</strong> Add your name, email, and any photos you took as proof</li>
                             <li><strong>Submit & Celebrate:</strong> Send it off and wait for your prize!</li>
                         </ol>
-                        
-                        <div class="important-note">
-                            <h4>⚠️ Don't Lose Your Card!</h4>
-                            <p><strong>This is crucial:</strong> Your bingo card only exists while this page is open. If you close the tab, refresh, or your browser crashes - poof! It's gone. That's why downloading it immediately is so important. Think of it like a paper ticket - once you lose it, there's no getting it back.</p>
-                        </div>
+        
                         
                         <h3>📸 Pro Tips from the Pros</h3>
                         <ul>
-                            <li><strong>Screenshot Everything:</strong> Take photos as you complete activities - they make great proof!</li>
                             <li><strong>Mark as You Go:</strong> Don't wait until the end to mark your squares</li>
                             <li><strong>Multiple Patterns:</strong> You can win with more than one pattern on the same card</li>
-                            <li><strong>Share the Fun:</strong> Each person gets their own unique card, so everyone can play!</li>
+                            <li><strong>Share the Fun:</strong> Bookmark this page so you can navigate here again</li>
                         </ul>
-                        
-                        <div class="privacy-note">
-                            <h4>🛡️ Your Privacy Matters</h4>
-                            <p>We take your privacy seriously! Your bingo card is generated using cryptographic magic - no personal data stored on our servers. Your Card ID is both your identifier and your proof of authenticity. Pretty cool, right?</p>
+
+                        <div class="fun-fact">
+                            <h4>🤯 Mind-Blowing Fun Fact!</h4>
+                            <p>Did you know there are <strong>620,448,401,733,239,439,360,000</strong> unique bingo combinations possible? That's over 620 quintillion! Your card is truly one-of-a-kind in the universe! 🌌</p>
                         </div>
                     </div>
                 </div>
@@ -159,25 +150,6 @@
                         <p>This card will disappear if you refresh or close this page. Save it immediately!</p>
                     </div>
                     <button id="downloadPng" class="btn btn-download">📸 Download PNG Now</button>
-                    
-                    <!-- PNG Upload Section -->
-                    <div class="upload-section" style="margin-top: 2rem;">
-                        <h3>📤 Upload Your PNG</h3>
-                        <p>Upload your bingo card PNG to save it in the cloud</p>
-                        <div class="upload-controls">
-                            <input type="file" id="pngUpload" accept="image/png" style="display: none;">
-                            <button type="button" class="btn btn-primary" onclick="document.getElementById('pngUpload').click();">
-                                📁 Choose PNG File
-                            </button>
-                            <button type="button" id="uploadBtn" class="btn btn-secondary" style="display: none;">
-                                ☁️ Save to Cloud
-                            </button>
-                        </div>
-                        <div id="uploadPreview" class="upload-preview" style="display: none;">
-                            <img id="previewImage" alt="Preview" style="max-width: 100%; max-height: 200px; border: 2px solid var(--border); border-radius: 8px;">
-                            <p id="fileName" class="file-name"></p>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -185,41 +157,34 @@
             <section class="right-column claim-section">
                 <div class="claim-card">
                     <h2>🏆 Claim Your Prize</h2>
-                    <p class="claim-intro">Got a winning pattern? Submit your claim here!</p>
+                    <p class="claim-intro">Got a winning pattern? Upload your completed card and claim your prize!</p>
                     
-                    <div class="claim-form-container hidden" id="claimFormContainer">
-                        <p class="claim-tip">💡 <strong>Remember:</strong> You should have already downloaded and marked your card offline before coming here!</p>
+                    <div class="claim-form-container" id="claimFormContainer">
+                        <p class="claim-tip">📸 <strong>Simple Process:</strong> Just upload a photo of your completed winning bingo card and fill out your details!</p>
                         <form id="claimForm">
                             <div class="form-group">
-                                <label for="claimName">Your Full Name:</label>
-                                <input type="text" id="claimName" placeholder="What should we call you?" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="claimEmail">Email Address:</label>
-                                <input type="email" id="claimEmail" placeholder="Where can we reach you?" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Show Us Your Winning Pattern:</label>
-                                <div class="marking-instructions">
-                                    <p>Click the squares below that match your winning pattern from your downloaded card</p>
-                                    <div id="markedSquares" class="marked-display"></div>
+                                <label for="winningCardUpload">Upload Your Winning Card: *</label>
+                                <input type="file" id="winningCardUpload" accept="image/*">
+                                <small>Show us your completed bingo card with the winning pattern marked!</small>
+                                <div id="cardPreview" class="upload-preview" style="display: none;">
+                                    <img id="cardPreviewImage" alt="Your winning card" style="max-width: 100%; max-height: 200px; border: 2px solid var(--border); border-radius: 8px;">
+                                    <p id="cardFileName" class="file-name"></p>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="claimAttachment">Got Photos? (Optional but Awesome!):</label>
-                                <input type="file" id="claimAttachment" accept="image/*,application/pdf">
-                                <small>Show us those completed activities in action!</small>
+                                <label for="claimName">Your Full Name: *</label>
+                                <input type="text" id="claimName" placeholder="What should we call you?">
                             </div>
                             
-                            <button type="submit" class="btn btn-primary btn-claim">🏆 Claim My Prize!</button>
+                            <div class="form-group">
+                                <label for="claimEmail">Email Address: *</label>
+                                <input type="email" id="claimEmail" placeholder="Where can we reach you?">
+                            </div>
+                            
+                            
+                            <button type="submit" class="btn btn-primary btn-claim">🏆 Submit My Winning Claim!</button>
                         </form>
-                    </div>
-                    
-                    <div class="claim-placeholder" id="claimPlaceholder">
-                        <p>First things first - generate your bingo card and download it right away! Then come back here when you've got a winning pattern to claim your prize.</p>
                     </div>
                 </div>
             </section>

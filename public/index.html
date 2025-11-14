@@ -223,7 +223,10 @@
                     <h2>✏️ Mark Existing Card</h2>
                 </div>
                 <div class="section-content">
-                    <p class="section-intro">Upload your bingo card and click squares to mark them as completed!</p>
+                    <!-- Instructions Box -->
+                    <div class="info-box">
+                        <p><strong>📋 How it works:</strong> Upload your bingo card, then click on completed squares to mark them. Purple squares get a checkmark ✓, the FREE square gets a star ⭐. Click again to unmark.</p>
+                    </div>
                     
                     <div class="mark-card-layout">
                         <div class="mark-controls">
@@ -241,24 +244,20 @@
                         
                         <div class="mark-card-area">
                             <div id="uploadedCardContainer" class="uploaded-card-container hidden">
-                                <div class="annotation-instructions">
-                                    <p>📍 <strong>Click on any square to mark it as completed!</strong></p>
-                                    <p>Hand-drawn style marks will appear on your selections.</p>
-                                </div>
                                 <div id="annotationCanvas" class="annotation-canvas">
                                     <img id="uploadedCardImage" alt="Your bingo card" />
-                                    <div id="clickOverlay" class="click-overlay"></div>
+                                    <canvas id="markCanvas" class="mark-canvas"></canvas>
                                 </div>
                             </div>
                             
                             <div id="annotationPlaceholder" class="annotation-placeholder">
                                 <div class="placeholder-content">
                                     <h3>🎯 Ready to Mark Your Card?</h3>
-                                    <p>Upload your bingo card image above and start clicking on completed squares!</p>
+                                    <p>Upload your card and click squares to mark them!</p>
                                     <ul>
-                                        <li>✨ Hand-drawn style annotations</li>
-                                        <li>🎨 No editing software needed</li>
-                                        <li>💾 Download your marked card</li>
+                                        <li>✓ Checkmark for completed squares</li>
+                                        <li>⭐ Star for FREE square</li>
+                                        <li>💾 Download when finished</li>
                                     </ul>
                                 </div>
                             </div>

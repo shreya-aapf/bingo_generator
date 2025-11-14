@@ -839,16 +839,23 @@ class BingoCardGenerator {
             const cardContainer = document.getElementById('uploadedCardContainer');
             const placeholder = document.getElementById('annotationPlaceholder');
             const annotationButtons = document.getElementById('annotationButtons');
+            const canvas = document.getElementById('markCanvas');
 
             uploadedImage.src = dataUrl;
             uploadedImage.onload = () => {
+                // Setup canvas to match image size
+                canvas.width = uploadedImage.naturalWidth;
+                canvas.height = uploadedImage.naturalHeight;
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+
                 // Show the image and controls
                 cardContainer.classList.remove('hidden');
                 placeholder.classList.add('hidden');
                 annotationButtons.classList.remove('hidden');
 
                 // Setup click detection
-                this.setupClickDetection();
+                this.setupGridClickDetection();
                 
                 this.showStatus('✅ Card loaded! Click on any square to mark it as completed.', 'success');
             };
@@ -860,100 +867,226 @@ class BingoCardGenerator {
     }
 
     /**
-     * Setup click detection on the uploaded bingo card
+     * Setup click detection for grid-based marking (5x5 bingo grid)
      */
-    setupClickDetection() {
-        const clickOverlay = document.getElementById('clickOverlay');
-        const uploadedImage = document.getElementById('uploadedCardImage');
+    setupGridClickDetection() {
+        const canvas = document.getElementById('markCanvas');
+        const annotationCanvas = document.getElementById('annotationCanvas');
         
-        // Clear existing event listeners
-        clickOverlay.replaceWith(clickOverlay.cloneNode(true));
-        const newOverlay = document.getElementById('clickOverlay');
+        // Clear existing marks
+        this.annotations = [];
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Position overlay over image
-        const updateOverlay = () => {
-            const rect = uploadedImage.getBoundingClientRect();
-            newOverlay.style.width = rect.width + 'px';
-            newOverlay.style.height = rect.height + 'px';
-            newOverlay.style.left = '0px';
-            newOverlay.style.top = '0px';
-        };
+        // Remove old event listener by cloning
+        const newAnnotationCanvas = annotationCanvas.cloneNode(true);
+        annotationCanvas.parentNode.replaceChild(newAnnotationCanvas, annotationCanvas);
         
-        // Update overlay on image load and window resize
-        uploadedImage.onload = updateOverlay;
-        window.addEventListener('resize', updateOverlay);
-        updateOverlay();
-
-        // Add click detection
-        newOverlay.addEventListener('click', (e) => {
-            const rect = newOverlay.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        // Get the new canvas reference
+        const finalCanvas = document.getElementById('markCanvas');
+        const finalAnnotationCanvas = document.getElementById('annotationCanvas');
+        
+        // Add click detection to the annotation canvas container
+        finalAnnotationCanvas.addEventListener('click', (e) => {
+            const rect = finalAnnotationCanvas.getBoundingClientRect();
+            const scaleX = finalCanvas.width / rect.width;
+            const scaleY = finalCanvas.height / rect.height;
             
-            // Convert to percentage coordinates
-            const xPercent = (x / rect.width) * 100;
-            const yPercent = (y / rect.height) * 100;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
             
-            this.addAnnotation(xPercent, yPercent, x, y);
+            this.markGridCell(x, y);
         });
     }
 
     /**
-     * Add rough notation annotation at clicked position
+     * Mark a bingo grid cell (assumes 5x5 grid)
      */
-    addAnnotation(xPercent, yPercent, pixelX, pixelY) {
-        const annotationCanvas = document.getElementById('annotationCanvas');
+    markGridCell(x, y) {
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
         
-        // Create a temporary element for the annotation
-        const annotationElement = document.createElement('div');
-        annotationElement.className = 'annotation-target';
-        annotationElement.style.position = 'absolute';
-        annotationElement.style.left = `${xPercent}%`;
-        annotationElement.style.top = `${yPercent}%`;
-        annotationElement.style.width = '80px';
-        annotationElement.style.height = '80px';
-        annotationElement.style.transform = 'translate(-50%, -50%)';
-        annotationElement.style.pointerEvents = 'none';
-        annotationElement.style.zIndex = '10';
+        // Calculate grid dimensions (5x5 bingo card)
+        const cardWidth = canvas.width;
+        const cardHeight = canvas.height;
         
-        annotationCanvas.appendChild(annotationElement);
+        // Precise margins calculated from actual card layout:
+        // - Orange header takes ~23.5% of height
+        // - Footer (CID/Proof) takes ~7.5% of height  
+        // - Grid occupies the middle ~69% of height
+        // - Purple borders on sides are ~1.5% each
+        
+        const topMargin = cardHeight * 0.235; // 23.5% for header
+        const bottomMargin = cardHeight * 0.075; // 7.5% for footer
+        const sideMargin = cardWidth * 0.015; // 1.5% on each side (purple border)
+        
+        const gridWidth = cardWidth - (sideMargin * 2);
+        const gridHeight = cardHeight - topMargin - bottomMargin;
+        
+        const cellWidth = gridWidth / 5;
+        const cellHeight = gridHeight / 5;
+        
+        // Determine which cell was clicked
+        const relativeX = x - sideMargin;
+        const relativeY = y - topMargin;
+        
+        // Check if click is within grid bounds
+        if (relativeX < 0 || relativeX > gridWidth || relativeY < 0 || relativeY > gridHeight) {
+            this.showStatus('⚠️ Click within the bingo grid to mark squares', 'warning');
+            return;
+        }
+        
+        const col = Math.floor(relativeX / cellWidth);
+        const row = Math.floor(relativeY / cellHeight);
+        
+        // Clamp to valid range (0-4)
+        const validCol = Math.max(0, Math.min(4, col));
+        const validRow = Math.max(0, Math.min(4, row));
+        
+        // Check if this cell is already marked
+        const cellKey = `${validRow}-${validCol}`;
+        const existingIndex = this.annotations.findIndex(a => a.key === cellKey);
+        
+        if (existingIndex !== -1) {
+            // Unmark the cell
+            this.annotations.splice(existingIndex, 1);
+            this.redrawAllMarks();
+            this.showStatus(`✅ Square unmarked! Total marks: ${this.annotations.length}`, 'success');
+        } else {
+            // Mark the cell
+            const cellData = {
+                key: cellKey,
+                row: validRow,
+                col: validCol,
+                x: sideMargin + (validCol * cellWidth),
+                y: topMargin + (validRow * cellHeight),
+                width: cellWidth,
+                height: cellHeight
+            };
+            
+            this.annotations.push(cellData);
+            this.drawCellMark(cellData);
+            this.showStatus(`✅ Square marked! Total marks: ${this.annotations.length}`, 'success');
+        }
+    }
 
-        // Create rough notation
-        const annotation = RoughNotation.annotate(annotationElement, {
-            type: 'circle',
-            color: '#e74c3c',
-            strokeWidth: 3,
-            padding: 10,
-            iterations: 2
+    /**
+     * Draw a filled rectangle over a cell (matching bingo card style)
+     */
+    drawCellMark(cellData) {
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Check if this is the center FREE square (row 2, col 2 in 0-indexed)
+        const isFreeSquare = cellData.row === 2 && cellData.col === 2;
+        
+        if (isFreeSquare) {
+            // Gold/yellow fill for FREE square
+            ctx.fillStyle = 'rgba(255, 188, 3, 0.5)'; // AA Gold with more transparency
+            ctx.fillRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Darker gold border
+            ctx.strokeStyle = 'rgba(204, 150, 2, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Draw a star in the center
+            this.drawStar(ctx, 
+                cellData.x + cellData.width / 2, 
+                cellData.y + cellData.height / 2, 
+                5, 
+                cellData.width * 0.15, 
+                cellData.width * 0.08,
+                'rgba(204, 150, 2, 1)');
+        } else {
+            // Purple fill for regular squares (matching the bingo card purple)
+            ctx.fillStyle = 'rgba(102, 45, 143, 0.5)'; // AA Plum with more transparency
+            ctx.fillRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Darker purple border
+            ctx.strokeStyle = 'rgba(82, 36, 114, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Draw a checkmark in the center
+            this.drawCheckmark(ctx, 
+                cellData.x + cellData.width / 2, 
+                cellData.y + cellData.height / 2, 
+                cellData.width * 0.3,
+                'rgba(82, 36, 114, 1)');
+        }
+    }
+    
+    /**
+     * Draw a star shape
+     */
+    drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+        let rot = Math.PI / 2 * 3;
+        let x = cx;
+        let y = cy;
+        let step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        
+        for (let i = 0; i < spikes; i++) {
+            x = cx + Math.cos(rot) * outerRadius;
+            y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+        }
+        
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+    
+    /**
+     * Draw a checkmark
+     */
+    drawCheckmark(ctx, cx, cy, size, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = size * 0.15;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Draw checkmark
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.3, cy);
+        ctx.lineTo(cx - size * 0.05, cy + size * 0.25);
+        ctx.lineTo(cx + size * 0.35, cy - size * 0.3);
+        ctx.stroke();
+    }
+
+    /**
+     * Redraw all marked cells
+     */
+    redrawAllMarks() {
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Redraw all marks
+        this.annotations.forEach(cellData => {
+            this.drawCellMark(cellData);
         });
-        
-        // Store annotation data
-        const annotationData = {
-            id: Date.now() + Math.random(),
-            element: annotationElement,
-            notation: annotation,
-            xPercent,
-            yPercent
-        };
-        
-        this.annotations.push(annotationData);
-        
-        // Show the annotation
-        annotation.show();
-        
-        this.showStatus(`✅ Square marked! Total marks: ${this.annotations.length}`, 'success');
     }
 
     /**
      * Clear all annotations
      */
     clearAllAnnotations() {
-        this.annotations.forEach(annotation => {
-            annotation.notation.hide();
-            if (annotation.element.parentNode) {
-                annotation.element.parentNode.removeChild(annotation.element);
-            }
-        });
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         this.annotations = [];
         this.showStatus('✅ All marks cleared!', 'success');
@@ -969,26 +1102,36 @@ class BingoCardGenerator {
         }
 
         try {
-            this.showStatus('Generating annotated card...', 'info');
+            this.showStatus('Generating marked card...', 'info');
 
-            const annotationCanvas = document.getElementById('annotationCanvas');
-            const canvas = await html2canvas(annotationCanvas, {
-                backgroundColor: '#ffffff',
-                scale: 2,
-                logging: false,
-                useCORS: true
-            });
+            // Create a temporary canvas to combine image and marks
+            const tempCanvas = document.createElement('canvas');
+            const uploadedImage = document.getElementById('uploadedCardImage');
+            const markCanvas = document.getElementById('markCanvas');
             
-            const dataUrl = canvas.toDataURL('image/png');
+            // Use the natural dimensions of the image (full resolution)
+            tempCanvas.width = uploadedImage.naturalWidth;
+            tempCanvas.height = uploadedImage.naturalHeight;
+            
+            const ctx = tempCanvas.getContext('2d');
+            
+            // Draw the original image at full size
+            ctx.drawImage(uploadedImage, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Draw the marks on top at full size
+            ctx.drawImage(markCanvas, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Convert to data URL and download
+            const dataUrl = tempCanvas.toDataURL('image/png', 1.0);
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
             const filename = `marked-bingo-card-${timestamp}.png`;
             
             this.downloadBlob(dataUrl, filename, 'image/png');
-            this.showStatus('✅ Annotated card downloaded successfully!', 'success');
+            this.showStatus('✅ Marked card downloaded successfully!', 'success');
 
         } catch (error) {
             console.error('Error downloading annotated card:', error);
-            this.showStatus('❌ Failed to generate annotated card. Please try again.', 'error');
+            this.showStatus('❌ Failed to generate marked card. Please try again.', 'error');
         }
     }
 

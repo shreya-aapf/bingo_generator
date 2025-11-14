@@ -68,10 +68,10 @@ header {
     text-align: center;
     background: transparent;
     border: none;
-    padding: 1rem 1rem 0.5rem 1rem;
+    padding: 3rem 1rem 1rem 1rem;
     box-shadow: none;
     transform: none;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 header h1 {
@@ -91,23 +91,23 @@ header h1 {
     color: rgba(248, 248, 248, 0.6);
     text-transform: none;
     letter-spacing: 0.02em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 2rem;
     font-weight: 300;
 }
 
 /* Card Selection Hero Section - Fan Layout */
 .card-selection-hero {
     position: relative;
-    min-height: 75vh;
+    min-height: 60vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding-top: 2rem;
+    padding-top: 0;
 }
 .card-fan-container {
     position: absolute;
-    bottom: -80px;
+    bottom: -60px;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
@@ -570,12 +570,15 @@ header h1 {
 }
 
 .nav-card-mini.active {
-    background: var(--primary-color);
-    border-color: var(--secondary-color);
-    box-shadow: 5px 5px 0px var(--secondary-color);
+    background: var(--aa-orange);
+    border-color: var(--aa-orange);
+    pointer-events: none;
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255, 90, 16, 0.6);
 }
 
 .nav-card-mini.active .nav-icon {
+    transform: scale(1.1);
     filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.3));
 }
 
@@ -624,14 +627,125 @@ header h1 {
     justify-content: space-between;
     align-items: center;
     border-bottom: 4px solid var(--border);
+    gap: 2rem;
 }
 
 .section-header h2 {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Arial', sans-serif;
     font-size: 2rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    text-transform: capitalize;
+    letter-spacing: 0.02em;
     margin: 0;
+    font-weight: 600;
+}
+
+.btn-section-header {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+/* Round Dice Button */
+.btn-round-dice {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--aa-gold);
+    border: 5px solid #000;
+    color: #000;
+    font-size: 2.5rem;
+    cursor: pointer;
+    box-shadow: 5px 5px 0px #000;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+.btn-round-dice:hover {
+    background: var(--aa-orange);
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 6px 6px 0px #000;
+}
+
+.btn-round-dice:active {
+    transform: scale(0.95) rotate(0deg);
+    box-shadow: 3px 3px 0px #000;
+}
+
+/* Download Banner */
+.download-banner {
+    background: linear-gradient(135deg, rgba(255, 90, 16, 0.15) 0%, rgba(255, 188, 3, 0.15) 100%);
+    border: 4px solid var(--aa-orange);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(255, 90, 16, 0.2);
+}
+
+.download-banner.hidden {
+    display: none;
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    justify-content: space-between;
+}
+
+.banner-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+    animation: wiggle 1s ease-in-out infinite;
+}
+
+.banner-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.banner-text strong {
+    font-size: 1.4rem;
+    font-family: 'Arial Black', sans-serif;
+    color: var(--aa-orange);
+    display: block;
+}
+
+.banner-text span {
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.btn-download-round {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--aa-orange);
+    border: 5px solid #000;
+    color: #fff;
+    font-size: 2.5rem;
+    cursor: pointer;
+    box-shadow: 5px 5px 0px #000;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-download-round:hover {
+    background: var(--aa-gold);
+    transform: scale(1.15) rotate(-10deg);
+    box-shadow: 6px 6px 0px #000;
+}
+
+.btn-download-round:active {
+    transform: scale(0.95);
+    box-shadow: 3px 3px 0px #000;
 }
 
 .btn-back {
@@ -659,7 +773,30 @@ header h1 {
 }
 
 /* Responsive Design for Cards */
+@media (max-width: 1024px) {
+    header {
+        padding: 2rem 1rem 1rem 1rem;
+    }
+    
+    header h1 {
+        font-size: 3.5rem;
+    }
+    
+    .card-fan-container {
+        max-width: 900px;
+    }
+    
+    .action-card-item {
+        width: 320px;
+        height: 420px;
+    }
+}
+
 @media (max-width: 968px) {
+    header {
+        padding: 1.5rem 1rem 1rem 1rem;
+    }
+    
     header h1 {
         font-size: 3rem;
     }
@@ -727,11 +864,28 @@ header h1 {
         bottom: 20px;
         left: 20px;
     }
+    
+    .content-section {
+        padding: 1rem;
+    }
+    
+    .section-content {
+        padding: 1.5rem;
+    }
+    
+    .mark-card-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
+    header {
+        padding: 1rem 0.5rem 0.5rem 0.5rem;
+    }
+    
     header h1 {
         font-size: 2.5rem;
+        letter-spacing: -0.03em;
     }
     
     .hero-subtitle {
@@ -764,13 +918,12 @@ header h1 {
     }
     
     .action-card-item[data-position="left"]:hover,
-    .action-card-item[data-position="center"]:hover,
     .action-card-item[data-position="right"]:hover {
-        transform: translateY(-40px) scale(1.05);
+        transform: translateY(-40px) scale(1.05) !important;
     }
     
     .action-card-item[data-position="center"]:hover {
-        transform: translateX(-50%) translateY(-50px) scale(1.08);
+        transform: translateX(-50%) translateY(-50px) scale(1.08) !important;
     }
     
     .card-icon {
@@ -789,10 +942,30 @@ header h1 {
         flex-direction: column;
         gap: 1rem;
         text-align: center;
+        padding: 1rem;
     }
     
     .section-header h2 {
         font-size: 1.5rem;
+    }
+    
+    .btn-round-dice {
+        width: 60px;
+        height: 60px;
+        font-size: 2.2rem;
+    }
+    
+    .download-banner {
+        padding: 1.25rem;
+    }
+    
+    .info-box {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .section-content {
+        padding: 1rem;
     }
     
     .nav-wheel {
@@ -823,6 +996,10 @@ header h1 {
         left: 15px;
     }
     
+    .help-modal {
+        padding: 1rem;
+    }
+    
     .help-modal-content {
         padding: 1.5rem;
         max-width: 90%;
@@ -835,60 +1012,213 @@ header h1 {
     .help-modal-content h4 {
         font-size: 1rem;
     }
+    
+    .bingo-card {
+        max-width: 100%;
+    }
+    
+    .generator-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
 }
 
 @media (max-width: 480px) {
+    header {
+        padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+    }
+    
     header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
+        letter-spacing: -0.04em;
     }
     
     .hero-subtitle {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
     
     .card-fan-container {
         bottom: -20px;
-        height: 300px;
+        height: 280px;
     }
     
     .action-card-item {
-        width: 180px;
-        height: 260px;
+        width: 160px;
+        height: 240px;
+    }
+    
+    .action-card-item[data-position="left"] {
+        transform: rotate(-15deg) translateY(40px);
+    }
+    
+    .action-card-item[data-position="center"] {
+        transform: translateX(-50%) rotate(0deg) translateY(30px);
+    }
+    
+    .action-card-item[data-position="right"] {
+        transform: rotate(15deg) translateY(40px);
     }
     
     .card-icon {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
     }
     
     .card-title {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
     }
     
     .card-description {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
     
     .nav-wheel {
-        width: 110px;
-        height: 110px;
+        width: 100px;
+        height: 100px;
+        bottom: 10px;
+        right: 10px;
     }
     
     .nav-card-mini {
-        width: 35px;
-        height: 35px;
-        font-size: 1rem;
-    }
-    
-    .nav-card-mini.nav-home {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         font-size: 0.9rem;
     }
     
+    .nav-card-mini.nav-home {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+    
     .help-button {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+        bottom: 10px;
+        left: 10px;
+    }
+    
+    .help-modal-content {
+        padding: 1rem;
+        border: 3px solid #000;
+    }
+    
+    .help-modal-content h3 {
+        font-size: 1.3rem;
+    }
+    
+    .help-close {
+        width: 35px;
+        height: 35px;
+        font-size: 1.5rem;
+    }
+    
+    .section-content {
+        padding: 0.75rem;
+    }
+    
+    .download-alert {
+        padding: 1.5rem;
+        max-width: 90%;
+    }
+    
+    .alert-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .alert-icon {
+        font-size: 2.5rem;
+    }
+    
+    .alert-text strong {
+        font-size: 1.1rem;
+    }
+    
+    .btn-download-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2.2rem;
+        align-self: center;
+    }
+    
+    .btn-round-dice {
+        width: 55px;
+        height: 55px;
+        font-size: 2rem;
+    }
+    
+    .banner-content {
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .banner-icon {
+        font-size: 2.2rem;
+    }
+    
+    .banner-text strong {
+        font-size: 1.1rem;
+    }
+    
+    .banner-text span {
+        font-size: 0.85rem;
+    }
+    
+    .btn-download-round {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+    
+    .download-banner {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box {
+        padding: 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .banner-content {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .banner-icon {
+        font-size: 2rem;
+    }
+    
+    .banner-text {
+        width: 100%;
+    }
+    
+    .banner-text strong {
+        font-size: 1rem;
+    }
+    
+    .banner-text span {
+        font-size: 0.8rem;
+    }
+    
+    .btn-round-dice {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+    }
+    
+    .btn-download-round {
+        width: 55px;
+        height: 55px;
+        font-size: 1.8rem;
     }
 }
 
@@ -899,6 +1229,28 @@ header h1 {
     color: var(--text-muted);
     margin-bottom: 1.5rem;
     text-align: center;
+}
+
+/* Info Box */
+.info-box {
+    background: linear-gradient(135deg, rgba(102, 45, 143, 0.08) 0%, rgba(255, 188, 3, 0.08) 100%);
+    border: 3px solid var(--aa-plum);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-box p {
+    font-family: 'Arial', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.info-box strong {
+    color: var(--aa-plum);
+    font-weight: 700;
 }
 
 .instructions-box {
@@ -1161,6 +1513,129 @@ header h1 {
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
+}
+
+/* Download Overlay */
+.download-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.download-overlay.hidden {
+    display: none;
+}
+
+.download-alert {
+    background: var(--surface);
+    border: 5px solid var(--aa-orange);
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(255, 90, 16, 0.5);
+    animation: alert-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes alert-pop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.alert-close {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #000;
+    background: var(--aa-plum);
+    color: #FFF;
+    font-size: 1.8rem;
+    font-weight: 900;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.alert-close:hover {
+    background: var(--aa-orange);
+    transform: rotate(90deg);
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.alert-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+    animation: wiggle 1s ease-in-out infinite;
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+.alert-text {
+    flex: 1;
+}
+
+.alert-text strong {
+    display: block;
+    font-size: 1.3rem;
+    font-family: 'Arial Black', sans-serif;
+    color: var(--aa-orange);
+    margin-bottom: 0.5rem;
+}
+
+.alert-text p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.btn-download-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 2rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--aa-orange);
+    border: 4px solid #000;
+    box-shadow: 4px 4px 0px #000;
+    transition: all 0.3s ease;
+}
+
+.btn-download-icon:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 6px 6px 0px #000;
 }
 
 .download-section {

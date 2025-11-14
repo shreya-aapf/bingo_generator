@@ -145,6 +145,12 @@ class BingoCardGenerator {
         // Hide hero
         heroSection.classList.add('hidden');
         
+        // Hide byline
+        const byline = document.querySelector('.hero-subtitle');
+        if (byline) {
+            byline.style.display = 'none';
+        }
+        
         // Show nav wheel
         navWheel.classList.add('visible');
         
@@ -197,6 +203,12 @@ class BingoCardGenerator {
         // Show hero
         heroSection.classList.remove('hidden');
         
+        // Show byline
+        const byline = document.querySelector('.hero-subtitle');
+        if (byline) {
+            byline.style.display = 'block';
+        }
+        
         // Hide nav wheel
         if (navWheel) {
             navWheel.classList.remove('visible');
@@ -248,12 +260,8 @@ class BingoCardGenerator {
             // Render the card
             this.renderCard();
             
-            // Update UI
-            document.getElementById('cardId').textContent = `Card ID: ${cid}`;
-            document.getElementById('cardProof').textContent = `Proof: ${proof}`;
-            
-            // Show action sections
-            document.getElementById('downloadSection').classList.remove('hidden');
+            // Show download banner
+            document.getElementById('downloadBanner').classList.remove('hidden');
             document.getElementById('arcadeBackground').classList.remove('hidden');
             
             this.showStatus(`Card ${cid} generated! 🚨 DOWNLOAD IT NOW - don't wait!`, 'success');

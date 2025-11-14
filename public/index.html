@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Card Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Pathfinder Summit Bingo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -79,7 +79,7 @@
     <div class="container">
         <header>
             <h1>Pathfinder Summit Bingo</h1>
-            <h2 class="hero-subtitle">Choose your card</h2>
+            <h2 class="hero-subtitle">Choose your card to begin</h2>
         </header>
         <!-- Card Selection Area - Fan Layout -->
         <section class="card-selection-hero">
@@ -102,11 +102,11 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Submit Prize (Right) -->
+                <!-- Card 3: Submit Claim (Right) -->
                 <div class="action-card-item" data-card="submit" data-position="right">
                     <div class="card-front">
                         <div class="card-icon">🏆</div>
-                        <h3 class="card-title">Submit<br>Prize</h3>
+                        <h3 class="card-title">Submit<br>Claim</h3>
                         <p class="card-description">Claim your winning reward</p>
                     </div>
                 </div>
@@ -122,10 +122,10 @@
                 <button class="nav-card-mini" data-nav="generate" title="Generate Card">
                     <span class="nav-icon">🎲</span>
                 </button>
-                <button class="nav-card-mini" data-nav="mark" title="Mark Card">
+                <button class="nav-card-mini" data-nav="mark" title="Edit Card">
                     <span class="nav-icon">✏️</span>
                 </button>
-                <button class="nav-card-mini" data-nav="submit" title="Submit Prize">
+                <button class="nav-card-mini" data-nav="submit" title="Submit Claim">
                     <span class="nav-icon">🏆</span>
                 </button>
             </div>
@@ -155,9 +155,16 @@
                         <li>You can win with multiple patterns on the same card</li>
                     </ul>
                     
+                    <h4>Marking Your Card:</h4>
+                    <ul>
+                        <li><strong>Manual Option:</strong> Mark your physical or printed card yourself with a pen/marker</li>
+                        <li><strong>Digital Option:</strong> Use our "Mark Card" tool to upload and mark your card digitally</li>
+                        <li>Both methods are accepted for prize claims!</li>
+                    </ul>
+                    
                     <h4>Claiming Prize:</h4>
                     <ol>
-                        <li><strong>Mark Your Card:</strong> Upload your card and click squares to mark them</li>
+                        <li><strong>Mark Your Card:</strong> Either manually or using our Card Marker tool</li>
                         <li><strong>Submit:</strong> Upload your completed card with name and email</li>
                         <li><strong>Wait:</strong> We'll contact you about your prize!</li>
                     </ol>
@@ -171,18 +178,26 @@
             <div class="content-section hidden" id="generateSection">
                 <div class="section-header">
                     <h2>🎲 Generate New Card</h2>
+                    <button id="generateCard" class="btn-round-dice" title="Generate New Card">🎲</button>
                 </div>
                 <div class="section-content">
-                    <p class="section-intro">Create your unique bingo card with just one click!</p>
+                    <!-- Instructions Box -->
+                    <div class="info-box">
+                        <p><strong>📋 How it works:</strong> Generate your card, download it immediately, and play during the event! When you win, you can either mark your card yourself and upload it, or use our Card Marker tool to mark it digitally before submitting your claim.</p>
+                    </div>
                     
-                    <div class="generator-controls">
-                        <button id="generateCard" class="btn btn-primary">🎲 Generate New Card</button>
-                        <div class="card-info">
-                            <span id="cardId">Card ID: Not generated</span>
-                            <span id="cardProof">Proof: Pending...</span>
+                    <!-- Download Alert Banner (shown after generation) -->
+                    <div class="download-banner hidden" id="downloadBanner">
+                        <div class="banner-content">
+                            <span class="banner-icon">⚠️</span>
+                            <div class="banner-text">
+                                <strong>Download Your Card NOW!</strong>
+                                <span>This card will disappear if you refresh or close this page.</span>
+                            </div>
+                            <button id="downloadPng" class="btn-download-round" title="Download PNG">📸</button>
                         </div>
                     </div>
-
+                    
                     <!-- Bingo Card Display -->
                     <div id="bingoCard" class="bingo-card hidden">
                         <div class="card-header">
@@ -198,25 +213,6 @@
                                 <span class="proof" id="displayProof"></span>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Download Section -->
-                    <div class="download-section hidden" id="downloadSection">
-                        <div class="download-warning">
-                            <h4>⚠️ Download Your Card NOW!</h4>
-                            <p>This card will disappear if you refresh or close this page. Save it immediately!</p>
-                        </div>
-                        <button id="downloadPng" class="btn btn-download">📸 Download PNG Now</button>
-                    </div>
-
-                    <div class="instructions-box">
-                        <h3>📋 Quick Instructions</h3>
-                        <ol>
-                            <li><strong>Generate:</strong> Click the button above to create your unique card</li>
-                            <li><strong>Download:</strong> Save it as PNG immediately - don't wait!</li>
-                            <li><strong>Play:</strong> Mark off squares as you complete activities</li>
-                            <li><strong>Win:</strong> Complete any row, column, or diagonal!</li>
-                        </ol>
                     </div>
                 </div>
             </div>
@@ -271,10 +267,10 @@
                 </div>
             </div>
 
-            <!-- Submit Prize Section -->
+            <!-- Submit Claim Section -->
             <div class="content-section hidden" id="submitSection">
                 <div class="section-header">
-                    <h2>🏆 Submit Winning Card</h2>
+                    <h2>🏆 Submit Winning Claim</h2>
                 </div>
                 <div class="section-content">
                     <p class="section-intro">Got a winning pattern? Upload your completed card and claim your prize!</p>

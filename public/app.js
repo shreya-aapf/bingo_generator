@@ -14,6 +14,8 @@ class BingoCardGenerator {
 
     init() {
         this.bindEvents();
+        this.setupCardNavigation();
+        this.setupHelpModal();
         this.showStatus('Ready to generate your first bingo card!', 'info');
     }
 
@@ -50,10 +52,6 @@ class BingoCardGenerator {
         });
 
         // Annotation mode event listeners
-        document.getElementById('showAnnotationMode').addEventListener('click', () => {
-            this.toggleAnnotationMode();
-        });
-
         document.getElementById('cardImageUpload').addEventListener('change', (e) => {
             this.handleCardImageUpload(e.target.files[0]);
         });
@@ -65,11 +63,155 @@ class BingoCardGenerator {
         document.getElementById('downloadAnnotated').addEventListener('click', () => {
             this.downloadAnnotatedCard();
         });
+    }
 
-        document.getElementById('backToGenerator').addEventListener('click', () => {
-            this.toggleAnnotationMode();
+    /**
+     * Setup card-based navigation
+     */
+    setupCardNavigation() {
+        const actionCards = document.querySelectorAll('.action-card-item');
+        const navWheel = document.getElementById('navWheel');
+        const navButtons = document.querySelectorAll('.nav-card-mini');
+        const cardSelectionHero = document.querySelector('.card-selection-hero');
+        
+        // Main card click handlers
+        actionCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const cardType = card.dataset.card;
+                this.showSection(cardType, cardSelectionHero, navWheel);
+            });
         });
+        
+        // Navigation wheel button handlers
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const navType = button.dataset.nav;
+                
+                // Home button - go back to card selection
+                if (navType === 'home') {
+                    this.hideAllSections(cardSelectionHero, navWheel);
+                    return;
+                }
+                
+                // Check if we're on hero page or in a section
+                const heroVisible = !cardSelectionHero.classList.contains('hidden');
+                
+                if (heroVisible) {
+                    // If on hero, navigate to section
+                    this.showSection(navType, cardSelectionHero, navWheel);
+                } else {
+                    // If in a section, switch sections
+                    this.switchSection(navType);
+                }
+                
+                // Update active state
+                navButtons.forEach(btn => {
+                    if (btn.dataset.nav === 'home') return; // Skip home button
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+            });
+        });
+    }
 
+    /**
+     * Setup help modal
+     */
+    setupHelpModal() {
+        const helpButton = document.getElementById('helpButton');
+        const helpModal = document.getElementById('helpModal');
+        const helpClose = document.getElementById('helpClose');
+        
+        helpButton.addEventListener('click', () => {
+            helpModal.classList.remove('hidden');
+        });
+        
+        helpClose.addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+        });
+        
+        // Close on background click
+        helpModal.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal.classList.add('hidden');
+            }
+        });
+    }
+
+    /**
+     * Show a specific content section
+     */
+    showSection(sectionType, heroSection, navWheel) {
+        // Hide hero
+        heroSection.classList.add('hidden');
+        
+        // Show nav wheel
+        navWheel.classList.add('visible');
+        
+        // Hide all content sections
+        const allSections = document.querySelectorAll('.content-section');
+        allSections.forEach(section => section.classList.add('hidden'));
+        
+        // Show selected section
+        const targetSection = document.getElementById(`${sectionType}Section`);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+            
+            // Update nav wheel active state
+            const navButtons = document.querySelectorAll('.nav-card-mini');
+            navButtons.forEach(btn => {
+                if (btn.dataset.nav === sectionType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    /**
+     * Switch between sections (when already viewing content)
+     */
+    switchSection(sectionType) {
+        // Hide all content sections
+        const allSections = document.querySelectorAll('.content-section');
+        allSections.forEach(section => section.classList.add('hidden'));
+        
+        // Show selected section
+        const targetSection = document.getElementById(`${sectionType}Section`);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    /**
+     * Hide all sections and show card selection
+     */
+    hideAllSections(heroSection, navWheel) {
+        // Show hero
+        heroSection.classList.remove('hidden');
+        
+        // Hide nav wheel
+        if (navWheel) {
+            navWheel.classList.remove('visible');
+        }
+        
+        // Hide all content sections
+        const allSections = document.querySelectorAll('.content-section');
+        allSections.forEach(section => section.classList.add('hidden'));
+        
+        // Clear nav wheel active states
+        const navButtons = document.querySelectorAll('.nav-card-mini');
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        
+        // Smooth scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     /**
@@ -667,33 +809,6 @@ class BingoCardGenerator {
     }
 
     /**
-     * Toggle between annotation mode and generator mode
-     */
-    toggleAnnotationMode() {
-        this.annotationMode = !this.annotationMode;
-        
-        const generatorLayout = document.querySelector('.three-column-layout');
-        const annotationSection = document.getElementById('annotationSection');
-        const toggleButton = document.getElementById('showAnnotationMode');
-        
-        if (this.annotationMode) {
-            // Switch to annotation mode
-            generatorLayout.style.display = 'none';
-            annotationSection.classList.remove('hidden');
-            toggleButton.textContent = '🎲 Generate New Card Instead';
-            this.showStatus('Switched to annotation mode. Upload your bingo card to start marking!', 'info');
-        } else {
-            // Switch back to generator mode
-            generatorLayout.style.display = 'grid';
-            annotationSection.classList.add('hidden');
-            toggleButton.textContent = '✏️ Mark Existing Card Instead';
-            this.showStatus('Switched back to generator mode.', 'info');
-            // Clear annotation state
-            this.clearAnnotationState();
-        }
-    }
-
-    /**
      * Handle uploaded bingo card image for annotation
      */
     async handleCardImageUpload(file) {
@@ -868,31 +983,6 @@ class BingoCardGenerator {
             this.showStatus('❌ Failed to generate annotated card. Please try again.', 'error');
         }
     }
-
-    /**
-     * Clear annotation state when switching modes
-     */
-    clearAnnotationState() {
-        // Clear annotations
-        this.clearAllAnnotations();
-        
-        // Reset UI
-        const cardContainer = document.getElementById('uploadedCardContainer');
-        const placeholder = document.getElementById('annotationPlaceholder');
-        const annotationButtons = document.getElementById('annotationButtons');
-        const cardUpload = document.getElementById('cardImageUpload');
-        
-        cardContainer.classList.add('hidden');
-        placeholder.classList.remove('hidden');
-        annotationButtons.classList.add('hidden');
-        
-        // Clear file input
-        cardUpload.value = '';
-        
-        // Reset image
-        this.uploadedCardImage = null;
-    }
-
 
     /**
      * Show status message to user

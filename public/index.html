@@ -78,90 +78,209 @@
 
     <div class="container">
         <header>
-            <h1>Pathfinder Bingo</h1>
+            <h1>Pathfinder Summit Bingo</h1>
+            <h2 class="hero-subtitle">Choose your card</h2>
         </header>
-
-        <main class="three-column-layout">
-            <!-- Left Column: Instructions -->
-            <section class="left-column instructions-section">
-                <div class="instruction-card">
-                    <h2>🎯 Let's Play Bingo!</h2>
-                    <div class="instructions-content">
-                        <h3>🎮 Here's How It Works</h3>
-                        <ol>
-                            <li><strong>Get Your Card:</strong> Hit "Generate New Card" and we'll create a unique bingo card just for you!</li>
-                            <li><strong>Save It Right Away:</strong> <em>Super important!</em> Download your card as PNG immediately - don't wait! If you refresh the page or close your browser, your card will be gone forever.</li>
-                            <li><strong>Play During the Event:</strong> As you experience activities that match your squares, mark them off on your saved copy</li>
-                            <li><strong>Win Big:</strong> Complete any full row, column, or diagonal and you've got a winner!</li>
-                        </ol>
-                        
-                        <h3>🏆 Ready to Claim Your Prize?</h3>
-                        <ol>
-                            <li><strong>Come Back Here:</strong> Navigate to this page again</li>
-                            <li><strong>Fill the Claims Form:</strong> Add your name, email, and any photos you took as proof</li>
-                            <li><strong>Submit & Celebrate:</strong> Send it off and wait for your prize!</li>
-                        </ol>
-        
-                        
-                        <h3>📸 Pro Tips from the Pros</h3>
-                        <ul>
-                            <li><strong>Mark as You Go:</strong> Don't wait until the end to mark your squares</li>
-                            <li><strong>Multiple Patterns:</strong> You can win with more than one pattern on the same card</li>
-                            <li><strong>Share the Fun:</strong> Bookmark this page so you can navigate here again</li>
-                        </ul>
-
-                        <div class="fun-fact">
-                            <h4>🤯 Mind-Blowing Fun Fact!</h4>
-                            <p>Did you know there are <strong>620,448,401,733,239,439,360,000</strong> unique bingo combinations possible? That's over 620 quintillion! Your card is truly one-of-a-kind in the universe! 🌌</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Middle Column: Card Generation -->
-            <section class="middle-column card-section">
-                <div class="generator-controls">
-                    <button id="generateCard" class="btn btn-primary">🎲 Generate New Card</button>
-                    <div class="card-info">
-                        <span id="cardId">Card ID: Not generated</span>
-                        <span id="cardProof">Proof: Pending...</span>
+        <!-- Card Selection Area - Fan Layout -->
+        <section class="card-selection-hero">
+            <div class="card-fan-container">
+                <!-- Card 1: Generate New Card (Left) -->
+                <div class="action-card-item" data-card="generate" data-position="left">
+                    <div class="card-front">
+                        <div class="card-icon">🎲</div>
+                        <h3 class="card-title">Generate<br>Card</h3>
+                        <p class="card-description">Create your unique bingo card</p>
                     </div>
                 </div>
 
-                <!-- Bingo Card Display -->
-                <div id="bingoCard" class="bingo-card hidden">
-                    <div class="card-header">
-                        <h2>B I N G O</h2>
-                    </div>
-                    <div class="card-grid" id="cardGrid">
-                        <!-- Grid cells will be populated by JavaScript -->
-                    </div>
-                    <div class="card-footer">
-                        <div class="card-details">
-                            <span class="cid" id="displayCid"></span>
-                            <span class="proof" id="displayProof"></span>
-                        </div>
+                <!-- Card 2: Mark Existing Card (Center) -->
+                <div class="action-card-item" data-card="mark" data-position="center">
+                    <div class="card-front">
+                        <div class="card-icon">✏️</div>
+                        <h3 class="card-title">Mark<br>Card</h3>
+                        <p class="card-description">Upload and mark your squares</p>
                     </div>
                 </div>
-                
-                <!-- Download Section -->
-                <div class="download-section hidden" id="downloadSection">
-                    <div class="download-warning">
-                        <h4>⚠️ Download Your Card NOW!</h4>
-                        <p>This card will disappear if you refresh or close this page. Save it immediately!</p>
-                    </div>
-                    <button id="downloadPng" class="btn btn-download">📸 Download PNG Now</button>
-                </div>
-            </section>
 
-            <!-- Right Column: Claim Prize -->
-            <section class="right-column claim-section">
-                <div class="claim-card">
-                    <h2>🏆 Claim Your Prize</h2>
-                    <p class="claim-intro">Got a winning pattern? Upload your completed card and claim your prize!</p>
+                <!-- Card 3: Submit Prize (Right) -->
+                <div class="action-card-item" data-card="submit" data-position="right">
+                    <div class="card-front">
+                        <div class="card-icon">🏆</div>
+                        <h3 class="card-title">Submit<br>Prize</h3>
+                        <p class="card-description">Claim your winning reward</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Floating Navigation Wheel -->
+        <nav class="nav-wheel" id="navWheel">
+            <div class="nav-wheel-inner">
+                <button class="nav-card-mini nav-home" data-nav="home" title="Home">
+                    <span class="nav-icon">🏠</span>
+                </button>
+                <button class="nav-card-mini" data-nav="generate" title="Generate Card">
+                    <span class="nav-icon">🎲</span>
+                </button>
+                <button class="nav-card-mini" data-nav="mark" title="Mark Card">
+                    <span class="nav-icon">✏️</span>
+                </button>
+                <button class="nav-card-mini" data-nav="submit" title="Submit Prize">
+                    <span class="nav-icon">🏆</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Help/Instructions Button -->
+        <button class="help-button" id="helpButton" title="How to Play">
+            <span>?</span>
+        </button>
+
+        <!-- Help Modal -->
+        <div class="help-modal hidden" id="helpModal">
+            <div class="help-modal-content">
+                <button class="help-close" id="helpClose">×</button>
+                <h3>🎯 How to Play Bingo</h3>
+                <div class="help-content">
+                    <h4>Getting Started:</h4>
+                    <ol>
+                        <li><strong>Generate Your Card:</strong> Click "Generate Card" to create a unique bingo card</li>
+                        <li><strong>Download Immediately:</strong> Save your card as PNG right away - it won't be stored!</li>
+                        <li><strong>Play During Event:</strong> Mark off squares as you complete activities</li>
+                    </ol>
                     
-                    <div class="claim-form-container" id="claimFormContainer">
-                        <p class="claim-tip">📸 <strong>Simple Process:</strong> Just upload a photo of your completed winning bingo card and fill out your details!</p>
+                    <h4>Winning:</h4>
+                    <ul>
+                        <li>Complete any full row, column, or diagonal</li>
+                        <li>You can win with multiple patterns on the same card</li>
+                    </ul>
+                    
+                    <h4>Claiming Prize:</h4>
+                    <ol>
+                        <li><strong>Mark Your Card:</strong> Upload your card and click squares to mark them</li>
+                        <li><strong>Submit:</strong> Upload your completed card with name and email</li>
+                        <li><strong>Wait:</strong> We'll contact you about your prize!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Sections (Hidden by default, shown when card is clicked) -->
+        <section class="content-sections">
+            <!-- Generate Card Section -->
+            <div class="content-section hidden" id="generateSection">
+                <div class="section-header">
+                    <h2>🎲 Generate New Card</h2>
+                </div>
+                <div class="section-content">
+                    <p class="section-intro">Create your unique bingo card with just one click!</p>
+                    
+                    <div class="generator-controls">
+                        <button id="generateCard" class="btn btn-primary">🎲 Generate New Card</button>
+                        <div class="card-info">
+                            <span id="cardId">Card ID: Not generated</span>
+                            <span id="cardProof">Proof: Pending...</span>
+                        </div>
+                    </div>
+
+                    <!-- Bingo Card Display -->
+                    <div id="bingoCard" class="bingo-card hidden">
+                        <div class="card-header">
+                            <div class="bingo-title">BINGO</div>
+                            <div class="bingo-subtitle">PATHFINDER SUMMIT</div>
+                        </div>
+                        <div class="card-grid" id="cardGrid">
+                            <!-- Grid cells will be populated by JavaScript -->
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-details">
+                                <span class="cid" id="displayCid"></span>
+                                <span class="proof" id="displayProof"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Download Section -->
+                    <div class="download-section hidden" id="downloadSection">
+                        <div class="download-warning">
+                            <h4>⚠️ Download Your Card NOW!</h4>
+                            <p>This card will disappear if you refresh or close this page. Save it immediately!</p>
+                        </div>
+                        <button id="downloadPng" class="btn btn-download">📸 Download PNG Now</button>
+                    </div>
+
+                    <div class="instructions-box">
+                        <h3>📋 Quick Instructions</h3>
+                        <ol>
+                            <li><strong>Generate:</strong> Click the button above to create your unique card</li>
+                            <li><strong>Download:</strong> Save it as PNG immediately - don't wait!</li>
+                            <li><strong>Play:</strong> Mark off squares as you complete activities</li>
+                            <li><strong>Win:</strong> Complete any row, column, or diagonal!</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mark Card Section -->
+            <div class="content-section hidden" id="markSection">
+                <div class="section-header">
+                    <h2>✏️ Mark Existing Card</h2>
+                </div>
+                <div class="section-content">
+                    <p class="section-intro">Upload your bingo card and click squares to mark them as completed!</p>
+                    
+                    <div class="mark-card-layout">
+                        <div class="mark-controls">
+                            <div class="form-group">
+                                <label for="cardImageUpload">Upload Your Bingo Card: *</label>
+                                <input type="file" id="cardImageUpload" accept="image/*">
+                                <small>Upload a photo or screenshot of your bingo card</small>
+                            </div>
+                            
+                            <div class="annotation-buttons hidden" id="annotationButtons">
+                                <button id="clearAnnotations" class="btn btn-secondary">🧹 Clear All Marks</button>
+                                <button id="downloadAnnotated" class="btn btn-download">💾 Download Marked Card</button>
+                            </div>
+                        </div>
+                        
+                        <div class="mark-card-area">
+                            <div id="uploadedCardContainer" class="uploaded-card-container hidden">
+                                <div class="annotation-instructions">
+                                    <p>📍 <strong>Click on any square to mark it as completed!</strong></p>
+                                    <p>Hand-drawn style marks will appear on your selections.</p>
+                                </div>
+                                <div id="annotationCanvas" class="annotation-canvas">
+                                    <img id="uploadedCardImage" alt="Your bingo card" />
+                                    <div id="clickOverlay" class="click-overlay"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="annotationPlaceholder" class="annotation-placeholder">
+                                <div class="placeholder-content">
+                                    <h3>🎯 Ready to Mark Your Card?</h3>
+                                    <p>Upload your bingo card image above and start clicking on completed squares!</p>
+                                    <ul>
+                                        <li>✨ Hand-drawn style annotations</li>
+                                        <li>🎨 No editing software needed</li>
+                                        <li>💾 Download your marked card</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Prize Section -->
+            <div class="content-section hidden" id="submitSection">
+                <div class="section-header">
+                    <h2>🏆 Submit Winning Card</h2>
+                </div>
+                <div class="section-content">
+                    <p class="section-intro">Got a winning pattern? Upload your completed card and claim your prize!</p>
+                    
+                    <div class="claim-form-wrapper">
+                        <p class="claim-tip">📸 <strong>Simple Process:</strong> Upload your completed winning bingo card and fill out your details!</p>
                         <form id="claimForm">
                             <div class="form-group">
                                 <label for="winningCardUpload">Upload Your Winning Card: *</label>
@@ -183,77 +302,15 @@
                                 <input type="email" id="claimEmail" placeholder="Where can we reach you?">
                             </div>
                             
-                            
                             <button type="submit" class="btn btn-primary btn-claim">🏆 Submit My Winning Claim!</button>
                         </form>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Interactive Card Annotation Section -->
-        <section class="annotation-section hidden" id="annotationSection">
-            <div class="container">
-                <h2>✏️ Mark Your Bingo Card Interactively</h2>
-                <p class="annotation-intro">No image editing software? No problem! Upload your bingo card and click on squares to mark them as completed.</p>
-                
-                <div class="annotation-layout">
-                    <!-- Upload Controls -->
-                    <div class="annotation-controls">
-                        <div class="form-group">
-                            <label for="cardImageUpload">Upload Your Bingo Card: *</label>
-                            <input type="file" id="cardImageUpload" accept="image/*">
-                            <small>Upload a photo or screenshot of your bingo card</small>
-                        </div>
-                        
-                        <div class="annotation-buttons hidden" id="annotationButtons">
-                            <button id="clearAnnotations" class="btn btn-secondary">🧹 Clear All Marks</button>
-                            <button id="downloadAnnotated" class="btn btn-download">💾 Download Marked Card</button>
-                            <button id="backToGenerator" class="btn btn-outline">← Back to Generator</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Image Display Area -->
-                    <div class="card-annotation-area">
-                        <div id="uploadedCardContainer" class="uploaded-card-container hidden">
-                            <div class="annotation-instructions">
-                                <p>📍 <strong>Click on any square to mark it as completed!</strong></p>
-                                <p>The rough notation library will draw hand-drawn style marks on your selections.</p>
-                            </div>
-                            <div id="annotationCanvas" class="annotation-canvas">
-                                <img id="uploadedCardImage" alt="Your bingo card" />
-                                <div id="clickOverlay" class="click-overlay"></div>
-                            </div>
-                        </div>
-                        
-                        <div id="annotationPlaceholder" class="annotation-placeholder">
-                            <div class="placeholder-content">
-                                <h3>🎯 Ready to Mark Your Card?</h3>
-                                <p>Upload your bingo card image above and start clicking on completed squares!</p>
-                                <ul>
-                                    <li>✨ Hand-drawn style annotations</li>
-                                    <li>🎨 No editing software needed</li>
-                                    <li>💾 Download your marked card</li>
-                                </ul>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <div class="section-toggle">
-            <button id="showAnnotationMode" class="btn btn-outline">✏️ Mark Existing Card Instead</button>
-        </div>
-
         <!-- Status Messages -->
         <div id="statusMessages" class="status-messages"></div>
-
-        <footer>
-            <p>🛡️   design • No user data stored • Open source</p>
-            <p class="tech-note">Built with Supabase Edge Functions • Fully serverless</p>
-        </footer>
-    </div>
 
     <script src="app.js"></script>
 </body>

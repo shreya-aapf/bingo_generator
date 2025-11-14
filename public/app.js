@@ -6,6 +6,9 @@ class BingoCardGenerator {
         this.currentCard = null;
         this.supabaseUrl = 'https://jnsfslmcowcefhpszrfx.supabase.co';
         this.sessionId = this.generateSessionId();
+        this.annotationMode = false;
+        this.annotations = [];
+        this.uploadedCardImage = null;
         this.init();
     }
 
@@ -44,6 +47,27 @@ class BingoCardGenerator {
 
         document.getElementById('claimEmail').addEventListener('input', (e) => {
             console.log('Email field changed:', e.target.value);
+        });
+
+        // Annotation mode event listeners
+        document.getElementById('showAnnotationMode').addEventListener('click', () => {
+            this.toggleAnnotationMode();
+        });
+
+        document.getElementById('cardImageUpload').addEventListener('change', (e) => {
+            this.handleCardImageUpload(e.target.files[0]);
+        });
+
+        document.getElementById('clearAnnotations').addEventListener('click', () => {
+            this.clearAllAnnotations();
+        });
+
+        document.getElementById('downloadAnnotated').addEventListener('click', () => {
+            this.downloadAnnotatedCard();
+        });
+
+        document.getElementById('backToGenerator').addEventListener('click', () => {
+            this.toggleAnnotationMode();
         });
 
     }
@@ -640,6 +664,233 @@ class BingoCardGenerator {
         } catch (error) {
             console.log('Could not clear card history:', error);
         }
+    }
+
+    /**
+     * Toggle between annotation mode and generator mode
+     */
+    toggleAnnotationMode() {
+        this.annotationMode = !this.annotationMode;
+        
+        const generatorLayout = document.querySelector('.three-column-layout');
+        const annotationSection = document.getElementById('annotationSection');
+        const toggleButton = document.getElementById('showAnnotationMode');
+        
+        if (this.annotationMode) {
+            // Switch to annotation mode
+            generatorLayout.style.display = 'none';
+            annotationSection.classList.remove('hidden');
+            toggleButton.textContent = '🎲 Generate New Card Instead';
+            this.showStatus('Switched to annotation mode. Upload your bingo card to start marking!', 'info');
+        } else {
+            // Switch back to generator mode
+            generatorLayout.style.display = 'grid';
+            annotationSection.classList.add('hidden');
+            toggleButton.textContent = '✏️ Mark Existing Card Instead';
+            this.showStatus('Switched back to generator mode.', 'info');
+            // Clear annotation state
+            this.clearAnnotationState();
+        }
+    }
+
+    /**
+     * Handle uploaded bingo card image for annotation
+     */
+    async handleCardImageUpload(file) {
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            this.showStatus('❌ Please select an image file (JPG, PNG, etc.).', 'error');
+            return;
+        }
+
+        try {
+            this.showStatus('Loading your bingo card...', 'info');
+
+            // Convert to data URL
+            const dataUrl = await this.fileToBase64(file);
+            this.uploadedCardImage = dataUrl;
+
+            // Display the image
+            const uploadedImage = document.getElementById('uploadedCardImage');
+            const cardContainer = document.getElementById('uploadedCardContainer');
+            const placeholder = document.getElementById('annotationPlaceholder');
+            const annotationButtons = document.getElementById('annotationButtons');
+
+            uploadedImage.src = dataUrl;
+            uploadedImage.onload = () => {
+                // Show the image and controls
+                cardContainer.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                annotationButtons.classList.remove('hidden');
+
+                // Setup click detection
+                this.setupClickDetection();
+                
+                this.showStatus('✅ Card loaded! Click on any square to mark it as completed.', 'success');
+            };
+
+        } catch (error) {
+            console.error('Error loading image:', error);
+            this.showStatus('❌ Error loading image. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * Setup click detection on the uploaded bingo card
+     */
+    setupClickDetection() {
+        const clickOverlay = document.getElementById('clickOverlay');
+        const uploadedImage = document.getElementById('uploadedCardImage');
+        
+        // Clear existing event listeners
+        clickOverlay.replaceWith(clickOverlay.cloneNode(true));
+        const newOverlay = document.getElementById('clickOverlay');
+        
+        // Position overlay over image
+        const updateOverlay = () => {
+            const rect = uploadedImage.getBoundingClientRect();
+            newOverlay.style.width = rect.width + 'px';
+            newOverlay.style.height = rect.height + 'px';
+            newOverlay.style.left = '0px';
+            newOverlay.style.top = '0px';
+        };
+        
+        // Update overlay on image load and window resize
+        uploadedImage.onload = updateOverlay;
+        window.addEventListener('resize', updateOverlay);
+        updateOverlay();
+
+        // Add click detection
+        newOverlay.addEventListener('click', (e) => {
+            const rect = newOverlay.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Convert to percentage coordinates
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+            
+            this.addAnnotation(xPercent, yPercent, x, y);
+        });
+    }
+
+    /**
+     * Add rough notation annotation at clicked position
+     */
+    addAnnotation(xPercent, yPercent, pixelX, pixelY) {
+        const annotationCanvas = document.getElementById('annotationCanvas');
+        
+        // Create a temporary element for the annotation
+        const annotationElement = document.createElement('div');
+        annotationElement.className = 'annotation-target';
+        annotationElement.style.position = 'absolute';
+        annotationElement.style.left = `${xPercent}%`;
+        annotationElement.style.top = `${yPercent}%`;
+        annotationElement.style.width = '80px';
+        annotationElement.style.height = '80px';
+        annotationElement.style.transform = 'translate(-50%, -50%)';
+        annotationElement.style.pointerEvents = 'none';
+        annotationElement.style.zIndex = '10';
+        
+        annotationCanvas.appendChild(annotationElement);
+
+        // Create rough notation
+        const annotation = RoughNotation.annotate(annotationElement, {
+            type: 'circle',
+            color: '#e74c3c',
+            strokeWidth: 3,
+            padding: 10,
+            iterations: 2
+        });
+        
+        // Store annotation data
+        const annotationData = {
+            id: Date.now() + Math.random(),
+            element: annotationElement,
+            notation: annotation,
+            xPercent,
+            yPercent
+        };
+        
+        this.annotations.push(annotationData);
+        
+        // Show the annotation
+        annotation.show();
+        
+        this.showStatus(`✅ Square marked! Total marks: ${this.annotations.length}`, 'success');
+    }
+
+    /**
+     * Clear all annotations
+     */
+    clearAllAnnotations() {
+        this.annotations.forEach(annotation => {
+            annotation.notation.hide();
+            if (annotation.element.parentNode) {
+                annotation.element.parentNode.removeChild(annotation.element);
+            }
+        });
+        
+        this.annotations = [];
+        this.showStatus('✅ All marks cleared!', 'success');
+    }
+
+    /**
+     * Download the annotated bingo card
+     */
+    async downloadAnnotatedCard() {
+        if (!this.uploadedCardImage || this.annotations.length === 0) {
+            this.showStatus('❌ Please upload a card and add some marks first.', 'error');
+            return;
+        }
+
+        try {
+            this.showStatus('Generating annotated card...', 'info');
+
+            const annotationCanvas = document.getElementById('annotationCanvas');
+            const canvas = await html2canvas(annotationCanvas, {
+                backgroundColor: '#ffffff',
+                scale: 2,
+                logging: false,
+                useCORS: true
+            });
+            
+            const dataUrl = canvas.toDataURL('image/png');
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const filename = `marked-bingo-card-${timestamp}.png`;
+            
+            this.downloadBlob(dataUrl, filename, 'image/png');
+            this.showStatus('✅ Annotated card downloaded successfully!', 'success');
+
+        } catch (error) {
+            console.error('Error downloading annotated card:', error);
+            this.showStatus('❌ Failed to generate annotated card. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * Clear annotation state when switching modes
+     */
+    clearAnnotationState() {
+        // Clear annotations
+        this.clearAllAnnotations();
+        
+        // Reset UI
+        const cardContainer = document.getElementById('uploadedCardContainer');
+        const placeholder = document.getElementById('annotationPlaceholder');
+        const annotationButtons = document.getElementById('annotationButtons');
+        const cardUpload = document.getElementById('cardImageUpload');
+        
+        cardContainer.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        annotationButtons.classList.add('hidden');
+        
+        // Clear file input
+        cardUpload.value = '';
+        
+        // Reset image
+        this.uploadedCardImage = null;
     }
 
 

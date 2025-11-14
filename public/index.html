@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/rough-notation/lib/rough-notation.iife.js"></script>
 </head>
 <body>
     <!-- Arcade Background Pattern -->
@@ -188,10 +189,65 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Status Messages -->
-            <div id="statusMessages" class="status-messages"></div>
         </main>
+
+        <!-- Interactive Card Annotation Section -->
+        <section class="annotation-section hidden" id="annotationSection">
+            <div class="container">
+                <h2>✏️ Mark Your Bingo Card Interactively</h2>
+                <p class="annotation-intro">No image editing software? No problem! Upload your bingo card and click on squares to mark them as completed.</p>
+                
+                <div class="annotation-layout">
+                    <!-- Upload Controls -->
+                    <div class="annotation-controls">
+                        <div class="form-group">
+                            <label for="cardImageUpload">Upload Your Bingo Card: *</label>
+                            <input type="file" id="cardImageUpload" accept="image/*">
+                            <small>Upload a photo or screenshot of your bingo card</small>
+                        </div>
+                        
+                        <div class="annotation-buttons hidden" id="annotationButtons">
+                            <button id="clearAnnotations" class="btn btn-secondary">🧹 Clear All Marks</button>
+                            <button id="downloadAnnotated" class="btn btn-download">💾 Download Marked Card</button>
+                            <button id="backToGenerator" class="btn btn-outline">← Back to Generator</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Image Display Area -->
+                    <div class="card-annotation-area">
+                        <div id="uploadedCardContainer" class="uploaded-card-container hidden">
+                            <div class="annotation-instructions">
+                                <p>📍 <strong>Click on any square to mark it as completed!</strong></p>
+                                <p>The rough notation library will draw hand-drawn style marks on your selections.</p>
+                            </div>
+                            <div id="annotationCanvas" class="annotation-canvas">
+                                <img id="uploadedCardImage" alt="Your bingo card" />
+                                <div id="clickOverlay" class="click-overlay"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="annotationPlaceholder" class="annotation-placeholder">
+                            <div class="placeholder-content">
+                                <h3>🎯 Ready to Mark Your Card?</h3>
+                                <p>Upload your bingo card image above and start clicking on completed squares!</p>
+                                <ul>
+                                    <li>✨ Hand-drawn style annotations</li>
+                                    <li>🎨 No editing software needed</li>
+                                    <li>💾 Download your marked card</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-toggle">
+            <button id="showAnnotationMode" class="btn btn-outline">✏️ Mark Existing Card Instead</button>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusMessages" class="status-messages"></div>
 
         <footer>
             <p>🛡️   design • No user data stored • Open source</p>

@@ -6,11 +6,16 @@ class BingoCardGenerator {
         this.currentCard = null;
         this.supabaseUrl = 'https://jnsfslmcowcefhpszrfx.supabase.co';
         this.sessionId = this.generateSessionId();
+        this.annotationMode = false;
+        this.annotations = [];
+        this.uploadedCardImage = null;
         this.init();
     }
 
     init() {
         this.bindEvents();
+        this.setupCardNavigation();
+        this.setupHelpModal();
         this.showStatus('Ready to generate your first bingo card!', 'info');
     }
 
@@ -46,6 +51,179 @@ class BingoCardGenerator {
             console.log('Email field changed:', e.target.value);
         });
 
+        // Annotation mode event listeners
+        document.getElementById('cardImageUpload').addEventListener('change', (e) => {
+            this.handleCardImageUpload(e.target.files[0]);
+        });
+
+        document.getElementById('clearAnnotations').addEventListener('click', () => {
+            this.clearAllAnnotations();
+        });
+
+        document.getElementById('downloadAnnotated').addEventListener('click', () => {
+            this.downloadAnnotatedCard();
+        });
+    }
+
+    /**
+     * Setup card-based navigation
+     */
+    setupCardNavigation() {
+        const actionCards = document.querySelectorAll('.action-card-item');
+        const navWheel = document.getElementById('navWheel');
+        const navButtons = document.querySelectorAll('.nav-card-mini');
+        const cardSelectionHero = document.querySelector('.card-selection-hero');
+        
+        // Main card click handlers
+        actionCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const cardType = card.dataset.card;
+                this.showSection(cardType, cardSelectionHero, navWheel);
+            });
+        });
+        
+        // Navigation wheel button handlers
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const navType = button.dataset.nav;
+                
+                // Home button - go back to card selection
+                if (navType === 'home') {
+                    this.hideAllSections(cardSelectionHero, navWheel);
+                    return;
+                }
+                
+                // Check if we're on hero page or in a section
+                const heroVisible = !cardSelectionHero.classList.contains('hidden');
+                
+                if (heroVisible) {
+                    // If on hero, navigate to section
+                    this.showSection(navType, cardSelectionHero, navWheel);
+                } else {
+                    // If in a section, switch sections
+                    this.switchSection(navType);
+                }
+                
+                // Update active state
+                navButtons.forEach(btn => {
+                    if (btn.dataset.nav === 'home') return; // Skip home button
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+            });
+        });
+    }
+
+    /**
+     * Setup help modal
+     */
+    setupHelpModal() {
+        const helpButton = document.getElementById('helpButton');
+        const helpModal = document.getElementById('helpModal');
+        const helpClose = document.getElementById('helpClose');
+        
+        helpButton.addEventListener('click', () => {
+            helpModal.classList.remove('hidden');
+        });
+        
+        helpClose.addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+        });
+        
+        // Close on background click
+        helpModal.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal.classList.add('hidden');
+            }
+        });
+    }
+
+    /**
+     * Show a specific content section
+     */
+    showSection(sectionType, heroSection, navWheel) {
+        // Hide hero
+        heroSection.classList.add('hidden');
+        
+        // Hide byline
+        const byline = document.querySelector('.hero-subtitle');
+        if (byline) {
+            byline.style.display = 'none';
+        }
+        
+        // Show nav wheel
+        navWheel.classList.add('visible');
+        
+        // Hide all content sections
+        const allSections = document.querySelectorAll('.content-section');
+        allSections.forEach(section => section.classList.add('hidden'));
+        
+        // Show selected section
+        const targetSection = document.getElementById(`${sectionType}Section`);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+            
+            // Update nav wheel active state
+            const navButtons = document.querySelectorAll('.nav-card-mini');
+            navButtons.forEach(btn => {
+                if (btn.dataset.nav === sectionType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    /**
+     * Switch between sections (when already viewing content)
+     */
+    switchSection(sectionType) {
+        // Hide all content sections
+        const allSections = document.querySelectorAll('.content-section');
+        allSections.forEach(section => section.classList.add('hidden'));
+        
+        // Show selected section
+        const targetSection = document.getElementById(`${sectionType}Section`);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    /**
+     * Hide all sections and show card selection
+     */
+    hideAllSections(heroSection, navWheel) {
+        // Show hero
+        heroSection.classList.remove('hidden');
+        
+        // Show byline
+        const byline = document.querySelector('.hero-subtitle');
+        if (byline) {
+            byline.style.display = 'block';
+        }
+        
+        // Hide nav wheel
+        if (navWheel) {
+            navWheel.classList.remove('visible');
+        }
+        
+        // Hide all content sections
+        const allSections = document.querySelectorAll('.content-section');
+        allSections.forEach(section => section.classList.add('hidden'));
+        
+        // Clear nav wheel active states
+        const navButtons = document.querySelectorAll('.nav-card-mini');
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        
+        // Smooth scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     /**
@@ -82,12 +260,8 @@ class BingoCardGenerator {
             // Render the card
             this.renderCard();
             
-            // Update UI
-            document.getElementById('cardId').textContent = `Card ID: ${cid}`;
-            document.getElementById('cardProof').textContent = `Proof: ${proof}`;
-            
-            // Show action sections
-            document.getElementById('downloadSection').classList.remove('hidden');
+            // Show download banner
+            document.getElementById('downloadBanner').classList.remove('hidden');
             document.getElementById('arcadeBackground').classList.remove('hidden');
             
             this.showStatus(`Card ${cid} generated! 🚨 DOWNLOAD IT NOW - don't wait!`, 'success');
@@ -642,6 +816,324 @@ class BingoCardGenerator {
         }
     }
 
+    /**
+     * Handle uploaded bingo card image for annotation
+     */
+    async handleCardImageUpload(file) {
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            this.showStatus('❌ Please select an image file (JPG, PNG, etc.).', 'error');
+            return;
+        }
+
+        try {
+            this.showStatus('Loading your bingo card...', 'info');
+
+            // Convert to data URL
+            const dataUrl = await this.fileToBase64(file);
+            this.uploadedCardImage = dataUrl;
+
+            // Display the image
+            const uploadedImage = document.getElementById('uploadedCardImage');
+            const cardContainer = document.getElementById('uploadedCardContainer');
+            const placeholder = document.getElementById('annotationPlaceholder');
+            const annotationButtons = document.getElementById('annotationButtons');
+            const canvas = document.getElementById('markCanvas');
+
+            uploadedImage.src = dataUrl;
+            uploadedImage.onload = () => {
+                // Setup canvas to match image size
+                canvas.width = uploadedImage.naturalWidth;
+                canvas.height = uploadedImage.naturalHeight;
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+
+                // Show the image and controls
+                cardContainer.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                annotationButtons.classList.remove('hidden');
+
+                // Setup click detection
+                this.setupGridClickDetection();
+                
+                this.showStatus('✅ Card loaded! Click on any square to mark it as completed.', 'success');
+            };
+
+        } catch (error) {
+            console.error('Error loading image:', error);
+            this.showStatus('❌ Error loading image. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * Setup click detection for grid-based marking (5x5 bingo grid)
+     */
+    setupGridClickDetection() {
+        const canvas = document.getElementById('markCanvas');
+        const annotationCanvas = document.getElementById('annotationCanvas');
+        
+        // Clear existing marks
+        this.annotations = [];
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Remove old event listener by cloning
+        const newAnnotationCanvas = annotationCanvas.cloneNode(true);
+        annotationCanvas.parentNode.replaceChild(newAnnotationCanvas, annotationCanvas);
+        
+        // Get the new canvas reference
+        const finalCanvas = document.getElementById('markCanvas');
+        const finalAnnotationCanvas = document.getElementById('annotationCanvas');
+        
+        // Add click detection to the annotation canvas container
+        finalAnnotationCanvas.addEventListener('click', (e) => {
+            const rect = finalAnnotationCanvas.getBoundingClientRect();
+            const scaleX = finalCanvas.width / rect.width;
+            const scaleY = finalCanvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            this.markGridCell(x, y);
+        });
+    }
+
+    /**
+     * Mark a bingo grid cell (assumes 5x5 grid)
+     */
+    markGridCell(x, y) {
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Calculate grid dimensions (5x5 bingo card)
+        const cardWidth = canvas.width;
+        const cardHeight = canvas.height;
+        
+        // Precise margins calculated from actual card layout:
+        // - Orange header takes ~23.5% of height
+        // - Footer (CID/Proof) takes ~7.5% of height  
+        // - Grid occupies the middle ~69% of height
+        // - Purple borders on sides are ~1.5% each
+        
+        const topMargin = cardHeight * 0.235; // 23.5% for header
+        const bottomMargin = cardHeight * 0.075; // 7.5% for footer
+        const sideMargin = cardWidth * 0.015; // 1.5% on each side (purple border)
+        
+        const gridWidth = cardWidth - (sideMargin * 2);
+        const gridHeight = cardHeight - topMargin - bottomMargin;
+        
+        const cellWidth = gridWidth / 5;
+        const cellHeight = gridHeight / 5;
+        
+        // Determine which cell was clicked
+        const relativeX = x - sideMargin;
+        const relativeY = y - topMargin;
+        
+        // Check if click is within grid bounds
+        if (relativeX < 0 || relativeX > gridWidth || relativeY < 0 || relativeY > gridHeight) {
+            this.showStatus('⚠️ Click within the bingo grid to mark squares', 'warning');
+            return;
+        }
+        
+        const col = Math.floor(relativeX / cellWidth);
+        const row = Math.floor(relativeY / cellHeight);
+        
+        // Clamp to valid range (0-4)
+        const validCol = Math.max(0, Math.min(4, col));
+        const validRow = Math.max(0, Math.min(4, row));
+        
+        // Check if this cell is already marked
+        const cellKey = `${validRow}-${validCol}`;
+        const existingIndex = this.annotations.findIndex(a => a.key === cellKey);
+        
+        if (existingIndex !== -1) {
+            // Unmark the cell
+            this.annotations.splice(existingIndex, 1);
+            this.redrawAllMarks();
+            this.showStatus(`✅ Square unmarked! Total marks: ${this.annotations.length}`, 'success');
+        } else {
+            // Mark the cell
+            const cellData = {
+                key: cellKey,
+                row: validRow,
+                col: validCol,
+                x: sideMargin + (validCol * cellWidth),
+                y: topMargin + (validRow * cellHeight),
+                width: cellWidth,
+                height: cellHeight
+            };
+            
+            this.annotations.push(cellData);
+            this.drawCellMark(cellData);
+            this.showStatus(`✅ Square marked! Total marks: ${this.annotations.length}`, 'success');
+        }
+    }
+
+    /**
+     * Draw a filled rectangle over a cell (matching bingo card style)
+     */
+    drawCellMark(cellData) {
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Check if this is the center FREE square (row 2, col 2 in 0-indexed)
+        const isFreeSquare = cellData.row === 2 && cellData.col === 2;
+        
+        if (isFreeSquare) {
+            // Gold/yellow fill for FREE square
+            ctx.fillStyle = 'rgba(255, 188, 3, 0.5)'; // AA Gold with more transparency
+            ctx.fillRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Darker gold border
+            ctx.strokeStyle = 'rgba(204, 150, 2, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Draw a star in the center
+            this.drawStar(ctx, 
+                cellData.x + cellData.width / 2, 
+                cellData.y + cellData.height / 2, 
+                5, 
+                cellData.width * 0.15, 
+                cellData.width * 0.08,
+                'rgba(204, 150, 2, 1)');
+        } else {
+            // Purple fill for regular squares (matching the bingo card purple)
+            ctx.fillStyle = 'rgba(102, 45, 143, 0.5)'; // AA Plum with more transparency
+            ctx.fillRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Darker purple border
+            ctx.strokeStyle = 'rgba(82, 36, 114, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(cellData.x, cellData.y, cellData.width, cellData.height);
+            
+            // Draw a checkmark in the center
+            this.drawCheckmark(ctx, 
+                cellData.x + cellData.width / 2, 
+                cellData.y + cellData.height / 2, 
+                cellData.width * 0.3,
+                'rgba(82, 36, 114, 1)');
+        }
+    }
+    
+    /**
+     * Draw a star shape
+     */
+    drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+        let rot = Math.PI / 2 * 3;
+        let x = cx;
+        let y = cy;
+        let step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        
+        for (let i = 0; i < spikes; i++) {
+            x = cx + Math.cos(rot) * outerRadius;
+            y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+        }
+        
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+    
+    /**
+     * Draw a checkmark
+     */
+    drawCheckmark(ctx, cx, cy, size, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = size * 0.15;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Draw checkmark
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.3, cy);
+        ctx.lineTo(cx - size * 0.05, cy + size * 0.25);
+        ctx.lineTo(cx + size * 0.35, cy - size * 0.3);
+        ctx.stroke();
+    }
+
+    /**
+     * Redraw all marked cells
+     */
+    redrawAllMarks() {
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Redraw all marks
+        this.annotations.forEach(cellData => {
+            this.drawCellMark(cellData);
+        });
+    }
+
+    /**
+     * Clear all annotations
+     */
+    clearAllAnnotations() {
+        const canvas = document.getElementById('markCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        this.annotations = [];
+        this.showStatus('✅ All marks cleared!', 'success');
+    }
+
+    /**
+     * Download the annotated bingo card
+     */
+    async downloadAnnotatedCard() {
+        if (!this.uploadedCardImage || this.annotations.length === 0) {
+            this.showStatus('❌ Please upload a card and add some marks first.', 'error');
+            return;
+        }
+
+        try {
+            this.showStatus('Generating marked card...', 'info');
+
+            // Create a temporary canvas to combine image and marks
+            const tempCanvas = document.createElement('canvas');
+            const uploadedImage = document.getElementById('uploadedCardImage');
+            const markCanvas = document.getElementById('markCanvas');
+            
+            // Use the natural dimensions of the image (full resolution)
+            tempCanvas.width = uploadedImage.naturalWidth;
+            tempCanvas.height = uploadedImage.naturalHeight;
+            
+            const ctx = tempCanvas.getContext('2d');
+            
+            // Draw the original image at full size
+            ctx.drawImage(uploadedImage, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Draw the marks on top at full size
+            ctx.drawImage(markCanvas, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Convert to data URL and download
+            const dataUrl = tempCanvas.toDataURL('image/png', 1.0);
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const filename = `marked-bingo-card-${timestamp}.png`;
+            
+            this.downloadBlob(dataUrl, filename, 'image/png');
+            this.showStatus('✅ Marked card downloaded successfully!', 'success');
+
+        } catch (error) {
+            console.error('Error downloading annotated card:', error);
+            this.showStatus('❌ Failed to generate marked card. Please try again.', 'error');
+        }
+    }
 
     /**
      * Show status message to user

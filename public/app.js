@@ -326,22 +326,128 @@ class BingoCardGenerator {
     /**
      * Generate deterministic bingo card content based on seed
      */
+    /**
+     * Generate 5x5 bingo card activities using rule-based system
+     */
     generateCardNumbers(seed) {
         // Use seed to create reproducible random sequence
         let random = this.seededRandom(parseInt(seed));
         
+        // Generate activities based on BINGO_DATA rules
+        const activities = this.generateActivitiesFromRules(random);
+        
+        // Create 5x5 grid
+        const grid = Array(5).fill(null).map(() => Array(5).fill(null));
+        
+        // Place fixed center square first
+        grid[2][2] = BINGO_DATA.N.center_free_square.text;
+        
+        // Shuffle remaining activities
+        const shuffledActivities = this.shuffleArray(activities, random);
+        
+        // Fill grid (skipping center)
+        let activityIndex = 0;
+        for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+                if (row === 2 && col === 2) continue; // Skip center
+                grid[row][col] = shuffledActivities[activityIndex++];
+            }
+        }
+        
+        // Convert grid to column format for compatibility
         const columns = {
-            B: this.generateColumnContent('B', random),
-            I: this.generateColumnContent('I', random),
-            N: this.generateColumnContent('N', random),
-            G: this.generateColumnContent('G', random),
-            O: this.generateColumnContent('O', random)
+            B: [grid[0][0], grid[1][0], grid[2][0], grid[3][0], grid[4][0]],
+            I: [grid[0][1], grid[1][1], grid[2][1], grid[3][1], grid[4][1]],
+            N: [grid[0][2], grid[1][2], grid[2][2], grid[3][2], grid[4][2]],
+            G: [grid[0][3], grid[1][3], grid[2][3], grid[3][3], grid[4][3]],
+            O: [grid[0][4], grid[1][4], grid[2][4], grid[3][4], grid[4][4]]
         };
         
-        // Set center as easy FREE space
-        columns.N[2] = 'Join the Pathfinder\nSummit group in\nthe community';
-        
         return columns;
+    }
+
+    /**
+     * Generate activities based on rules from BINGO_DATA
+     */
+    generateActivitiesFromRules(random) {
+        const selectedActivities = [];
+        const rules = BINGO_DATA.rules.per_card;
+        
+        for (const rule of rules) {
+            // Skip the center free square (handled separately)
+            if (rule.fixed && rule.slot === 'center') {
+                continue;
+            }
+            
+            const bucket = BINGO_DATA[rule.from];
+            let sourceItems = [];
+            
+            // Determine source items
+            if (rule.subgroup && bucket.subgroups && bucket.subgroups[rule.subgroup]) {
+                sourceItems = [...bucket.subgroups[rule.subgroup].items];
+            } else if (bucket.items) {
+                sourceItems = [...bucket.items];
+            }
+            
+            // Handle different pick types
+            let pickCount = 0;
+            if (rule.pick !== undefined) {
+                pickCount = rule.pick;
+            } else if (rule.pick_range) {
+                // Random count within range
+                const [min, max] = rule.pick_range;
+                pickCount = min + Math.floor(random() * (max - min + 1));
+            }
+            
+            // Handle must_include constraint
+            if (rule.must_include && sourceItems.includes(rule.must_include)) {
+                selectedActivities.push(rule.must_include);
+                sourceItems = sourceItems.filter(item => item !== rule.must_include);
+                pickCount--;
+            }
+            
+            // Shuffle and pick remaining items
+            const shuffled = this.shuffleArray(sourceItems, random);
+            for (let i = 0; i < pickCount && i < shuffled.length; i++) {
+                selectedActivities.push(shuffled[i]);
+            }
+        }
+        
+        // Ensure we have exactly 24 activities (25 total including center)
+        const needed = 24;
+        if (selectedActivities.length < needed) {
+            console.warn(`Only generated ${selectedActivities.length} activities, need ${needed}`);
+            // Fill with random items from all pools to reach 24
+            const allItems = [
+                ...BINGO_DATA.B.items,
+                ...BINGO_DATA.I.subgroups.hands_on.items,
+                ...BINGO_DATA.N.items,
+                ...BINGO_DATA.G.subgroups.framework_tags.items,
+                ...BINGO_DATA.O.subgroups.product_highlights.items
+            ];
+            const available = allItems.filter(item => !selectedActivities.includes(item));
+            const shuffled = this.shuffleArray(available, random);
+            while (selectedActivities.length < needed && shuffled.length > 0) {
+                selectedActivities.push(shuffled.pop());
+            }
+        } else if (selectedActivities.length > needed) {
+            // Trim excess
+            selectedActivities.length = needed;
+        }
+        
+        return selectedActivities;
+    }
+
+    /**
+     * Shuffle array using seeded random
+     */
+    shuffleArray(array, random) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
     }
 
     /**

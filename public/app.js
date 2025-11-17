@@ -823,7 +823,11 @@ class BingoCardGenerator {
                 throw new Error(result.error);
             }
             
-            this.showStatus(`🎉 Winning claim submitted successfully! We'll be in touch soon.`, 'success');
+            this.showSuccessModal(
+                `🎉 Winning Claim Submitted Successfully!`,
+                `We've received your winning bingo card. Our team will review it and be in touch with you soon via email.`,
+                result.claimRef
+            );
 
             // Clear form and preview
             document.getElementById('claimForm').reset();
@@ -1072,7 +1076,7 @@ class BingoCardGenerator {
             
             this.annotations.push(cellData);
             this.drawCellMark(cellData);
-            this.showStatus(`✅ Square marked! Total marks: ${this.annotations.length}`, 'success');
+        this.showStatus(`✅ Square marked! Total marks: ${this.annotations.length}`, 'success');
         }
     }
 
@@ -1261,6 +1265,55 @@ class BingoCardGenerator {
         setTimeout(() => {
             this.dismissMessage(messageEl);
         }, 3000);
+    }
+
+    /**
+     * Show large success modal for winning claim submission
+     */
+    showSuccessModal(title, message, claimRef) {
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'success-modal-overlay';
+        
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'success-modal';
+        modal.innerHTML = `
+            <div class="success-modal-icon">✓</div>
+            <h2 class="success-modal-title">${title}</h2>
+            <p class="success-modal-message">${message}</p>
+            <div class="success-modal-claim-ref">
+                <strong>Claim Reference:</strong> <code>${claimRef}</code>
+            </div>
+            <button class="success-modal-close">Got It!</button>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+        // Animate in
+        setTimeout(() => {
+            overlay.classList.add('visible');
+        }, 10);
+        
+        // Close on button click
+        const closeBtn = modal.querySelector('.success-modal-close');
+        closeBtn.addEventListener('click', () => {
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                overlay.remove();
+            }, 300);
+        });
+        
+        // Close on overlay click (but not modal click)
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    overlay.remove();
+                }, 300);
+            }
+        });
     }
 
     /**

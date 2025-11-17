@@ -776,9 +776,9 @@ header h1 {
 @media (max-width: 1024px) {
     header {
         padding: 2rem 1rem 1rem 1rem;
-    }
-    
-    header h1 {
+}
+
+header h1 {
         font-size: 3.5rem;
     }
     
@@ -2975,4 +2975,184 @@ footer {
 .btn-outline:hover {
     background: var(--aa-orange);
     color: var(--text-light);
+}
+
+/* ============================================ */
+/* SUCCESS MODAL FOR WINNING CLAIM SUBMISSION */
+/* ============================================ */
+
+.success-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 1rem;
+}
+
+.success-modal-overlay.visible {
+    opacity: 1;
+}
+
+.success-modal {
+    background: var(--surface);
+    border: 4px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    max-width: 600px;
+    width: 100%;
+    padding: 3rem 2.5rem;
+    text-align: center;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+}
+
+.success-modal-overlay.visible .success-modal {
+    transform: scale(1);
+}
+
+.success-modal-icon {
+    width: 120px;
+    height: 120px;
+    background: var(--success-color);
+    color: var(--surface);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    font-weight: 900;
+    margin: 0 auto 2rem;
+    border: 4px solid var(--border);
+    box-shadow: 8px 8px 0px var(--border);
+    animation: successPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes successPop {
+    0% {
+        transform: scale(0) rotate(-180deg);
+    }
+    50% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.success-modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 1.5rem;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+
+.success-modal-message {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--text-medium);
+    margin: 0 0 2rem;
+    font-weight: 500;
+}
+
+.success-modal-claim-ref {
+    background: var(--background);
+    border: 3px solid var(--border);
+    padding: 1.25rem;
+    margin: 0 0 2rem;
+    font-size: 1.1rem;
+}
+
+.success-modal-claim-ref strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.9rem;
+}
+
+.success-modal-claim-ref code {
+    display: inline-block;
+    background: var(--primary-color);
+    color: var(--surface);
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    border: 2px solid var(--border);
+}
+
+.success-modal-close {
+    background: var(--success-color);
+    color: var(--surface);
+    border: 3px solid var(--border);
+    padding: 1rem 3rem;
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Barlow Condensed', sans-serif;
+    box-shadow: 6px 6px 0px var(--border);
+}
+
+.success-modal-close:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 4px 4px 0px var(--border);
+    background: var(--aa-orange);
+}
+
+.success-modal-close:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0px 0px 0px var(--border);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .success-modal {
+        padding: 2rem 1.5rem;
+        max-width: 95%;
+    }
+    
+    .success-modal-icon {
+        width: 100px;
+        height: 100px;
+        font-size: 4rem;
+    }
+    
+    .success-modal-title {
+        font-size: 2rem;
+    }
+    
+    .success-modal-message {
+        font-size: 1.1rem;
+    }
+    
+    .success-modal-claim-ref code {
+        font-size: 1.2rem;
+        padding: 0.6rem 1rem;
+    }
+    
+    .success-modal-close {
+        padding: 0.9rem 2rem;
+        font-size: 1.1rem;
+        width: 100%;
+    }
 }

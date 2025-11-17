@@ -139,6 +139,19 @@ serve(async (req) => {
       timestamp: timestamp || new Date().toISOString()
     })
 
+    // Insert claim record into database
+    const claimRecord = await insertClaimToDatabase({
+      supabase,
+      claimRef,
+      name,
+      email,
+      fileUrl: uploadResult.publicUrl,
+      filePath: uploadResult.path,
+      imageType,
+      fileSize: imageBuffer.length,
+      timestamp: timestamp || new Date().toISOString()
+    })
+
     const response: UploadWinningCardResponse = {
       success: true,
       bucketUrl: uploadResult.publicUrl,
@@ -150,6 +163,7 @@ serve(async (req) => {
     console.log(`   - Claimant: ${name} (${email})`)
     console.log(`   - File: ${uploadResult.fileName}`)
     console.log(`   - Claim Reference: ${claimRef}`)
+    console.log(`   - Database Record ID: ${claimRecord.id}`)
 
     return new Response(
       JSON.stringify(response),
@@ -245,4 +259,54 @@ function generateClaimReference(): string {
   const timestamp = Date.now().toString(36).toUpperCase()
   const randomPart = Math.random().toString(36).substr(2, 6).toUpperCase()
   return `CLAIM-${timestamp}-${randomPart}`
+}
+
+/**
+ * Insert claim record into winning_claims table
+ */
+async function insertClaimToDatabase({
+  supabase,
+  claimRef,
+  name,
+  email,
+  fileUrl,
+  filePath,
+  imageType,
+  fileSize,
+  timestamp
+}: {
+  supabase: any
+  claimRef: string
+  name: string
+  email: string
+  fileUrl: string
+  filePath: string
+  imageType: string
+  fileSize: number
+  timestamp: string
+}) {
+  console.log(`Inserting claim record to database: ${claimRef}`)
+
+  const { data, error } = await supabase
+    .from('winning_claims')
+    .insert({
+      claim_ref: claimRef,
+      full_name: name,
+      email: email,
+      file_url: fileUrl,
+      file_path: filePath,
+      image_type: imageType,
+      file_size_bytes: fileSize,
+      submitted_at: timestamp
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Database insert error:', error)
+    throw new Error(`Failed to insert claim record: ${error.message}`)
+  }
+
+  console.log('✅ Claim record inserted successfully')
+  return data
 }

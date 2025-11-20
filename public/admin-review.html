@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Claims Review | Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --aa-orange: #FF6C2F;
+            --aa-plum: #592C82;
+            --aa-gold: #F5A623;
+            --surface: #FFFFFF;
+            --background: #F8F9FA;
+            --border: #2D2D2D;
+            --text-dark: #1A1A1A;
+            --text-medium: #4A4A4A;
+            --text-light: #FFFFFF;
+            --success-color: #10B981;
+            --error-color: #EF4444;
+            --warning-color: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--aa-plum);
+            color: var(--text-light);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 4px solid var(--border);
+        }
+
+        .header h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .upload-section {
+            background: var(--surface);
+            border: 3px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .upload-section h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            background: var(--aa-orange);
+            color: var(--text-light);
+            padding: 1rem 2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 3px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .file-input-label:hover {
+            background: var(--aa-plum);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: var(--surface);
+            border: 3px solid var(--border);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'Barlow Condensed', sans-serif;
+            color: var(--aa-plum);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-medium);
+            font-weight: 600;
+        }
+
+        .filters {
+            background: var(--surface);
+            border: 3px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            font-family: 'Barlow Condensed', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background: var(--background);
+        }
+
+        .filter-btn.active {
+            background: var(--aa-plum);
+            color: var(--text-light);
+        }
+
+        .export-btn {
+            margin-left: auto;
+            background: var(--aa-gold);
+            color: var(--text-dark);
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            font-family: 'Barlow Condensed', sans-serif;
+        }
+
+        .export-btn:hover {
+            background: var(--aa-orange);
+            color: var(--text-light);
+        }
+
+        .claims-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .claim-card {
+            background: var(--surface);
+            border: 3px solid var(--border);
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .claim-card.approved {
+            border-color: var(--success-color);
+            background: #f0fdf4;
+        }
+
+        .claim-card.rejected {
+            border-color: var(--error-color);
+            background: #fef2f2;
+            opacity: 0.7;
+        }
+
+        .claim-image-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .claim-image {
+            width: 100%;
+            height: auto;
+            border: 3px solid var(--border);
+            cursor: pointer;
+        }
+
+        .claim-image:hover {
+            opacity: 0.9;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .btn-small:hover {
+            background: var(--background);
+        }
+
+        .claim-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .claim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .claim-id {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--aa-plum);
+        }
+
+        .claim-status {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-family: 'Barlow Condensed', sans-serif;
+        }
+
+        .status-pending {
+            background: var(--warning-color);
+            color: var(--text-dark);
+        }
+
+        .status-approved {
+            background: var(--success-color);
+            color: var(--text-light);
+        }
+
+        .status-rejected {
+            background: var(--error-color);
+            color: var(--text-light);
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-medium);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: auto;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 1rem;
+            border: 3px solid var(--border);
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            font-family: 'Barlow Condensed', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .btn-approve {
+            background: var(--success-color);
+            color: var(--text-light);
+        }
+
+        .btn-approve:hover {
+            background: #059669;
+        }
+
+        .btn-reject {
+            background: var(--error-color);
+            color: var(--text-light);
+        }
+
+        .btn-reject:hover {
+            background: #dc2626;
+        }
+
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-medium);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-family: 'Barlow Condensed', sans-serif;
+        }
+
+        /* Modal for full image */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border: 4px solid var(--surface);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: var(--surface);
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .claim-card {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                min-width: 100%;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .export-btn {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Bingo Claims Review</h1>
+        <p>Admin Dashboard - Pathfinder Summit</p>
+    </div>
+
+    <div class="container">
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <h2>📤 Upload Claims CSV</h2>
+            <p>Export the <code>winning_claims</code> table from Supabase as CSV and upload it here.</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="csvFile" accept=".csv" />
+                <label for="csvFile" class="file-input-label">
+                    Choose CSV File
+                </label>
+            </div>
+            <p id="fileName" style="margin-top: 1rem; font-weight: 600;"></p>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar" id="statsBar" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="totalClaims">0</div>
+                <div class="stat-label">Total Claims</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pendingClaims">0</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="approvedClaims">0</div>
+                <div class="stat-label">Approved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="rejectedClaims">0</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters" id="filters" style="display: none;">
+            <button class="filter-btn active" data-filter="all">All Claims</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="approved">Approved</button>
+            <button class="filter-btn" data-filter="rejected">Rejected</button>
+            <button class="export-btn" id="exportBtn">📥 Export Updated CSV</button>
+        </div>
+
+        <!-- Claims Grid -->
+        <div class="claims-grid" id="claimsGrid"></div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <img src="" alt="Full size bingo card" class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        let claimsData = [];
+        let currentFilter = 'all';
+
+        // CSV File Upload Handler
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = `Loading: ${file.name}`;
+                parseCSV(file);
+            }
+        });
+
+        // Parse CSV File
+        function parseCSV(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const rows = text.split('\n');
+                const headers = rows[0].split(',').map(h => h.trim());
+                
+                claimsData = [];
+                
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i].trim() === '') continue;
+                    
+                    const values = parseCSVRow(rows[i]);
+                    const claim = {};
+                    
+                    headers.forEach((header, index) => {
+                        claim[header] = values[index] || '';
+                    });
+                    
+                    // Add local status tracking
+                    claim.localStatus = claim.status || 'pending';
+                    
+                    claimsData.push(claim);
+                }
+                
+                displayClaims();
+                updateStats();
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('statsBar').style.display = 'flex';
+                document.getElementById('filters').style.display = 'flex';
+            };
+            reader.readAsText(file);
+        }
+
+        // Parse CSV row handling quoted values
+        function parseCSVRow(row) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current.trim());
+            return values;
+        }
+
+        // Display Claims
+        function displayClaims() {
+            const grid = document.getElementById('claimsGrid');
+            grid.innerHTML = '';
+            
+            const filteredClaims = claimsData.filter(claim => {
+                if (currentFilter === 'all') return true;
+                return claim.localStatus === currentFilter;
+            });
+            
+            if (filteredClaims.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No claims found</h3>
+                        <p>No claims match the current filter.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredClaims.forEach((claim, index) => {
+                const actualIndex = claimsData.indexOf(claim);
+                const card = createClaimCard(claim, actualIndex);
+                grid.appendChild(card);
+            });
+        }
+
+        // Create Claim Card
+        function createClaimCard(claim, index) {
+            const card = document.createElement('div');
+            card.className = `claim-card ${claim.localStatus}`;
+            
+            const submittedDate = new Date(claim.submitted_at || claim.created_at).toLocaleString();
+            
+            card.innerHTML = `
+                <div class="claim-image-section">
+                    <img src="${claim.file_url}" alt="Bingo Card" class="claim-image" onclick="openModal('${claim.file_url}')">
+                    <div class="image-actions">
+                        <button class="btn-small" onclick="openImageInNew('${claim.file_url}')">Open Image</button>
+                        <button class="btn-small" onclick="downloadImage('${claim.file_url}', '${claim.claim_ref}')">Download</button>
+                    </div>
+                </div>
+                
+                <div class="claim-details">
+                    <div class="claim-header">
+                        <div class="claim-id">${claim.claim_ref || claim.id}</div>
+                        <div class="claim-status status-${claim.localStatus}">${claim.localStatus}</div>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">${claim.full_name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">${claim.email}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Submitted</div>
+                            <div class="info-value">${submittedDate}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">File Type</div>
+                            <div class="info-value">${claim.image_type || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">File Size</div>
+                            <div class="info-value">${formatFileSize(claim.file_size_bytes)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-action btn-approve" onclick="updateStatus(${index}, 'approved')" ${claim.localStatus === 'approved' ? 'disabled' : ''}>
+                            ✓ Approve
+                        </button>
+                        <button class="btn-action btn-reject" onclick="updateStatus(${index}, 'rejected')" ${claim.localStatus === 'rejected' ? 'disabled' : ''}>
+                            ✕ Reject
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Update Status
+        function updateStatus(index, status) {
+            claimsData[index].localStatus = status;
+            displayClaims();
+            updateStats();
+        }
+
+        // Update Statistics
+        function updateStats() {
+            const total = claimsData.length;
+            const pending = claimsData.filter(c => c.localStatus === 'pending').length;
+            const approved = claimsData.filter(c => c.localStatus === 'approved').length;
+            const rejected = claimsData.filter(c => c.localStatus === 'rejected').length;
+            
+            document.getElementById('totalClaims').textContent = total;
+            document.getElementById('pendingClaims').textContent = pending;
+            document.getElementById('approvedClaims').textContent = approved;
+            document.getElementById('rejectedClaims').textContent = rejected;
+        }
+
+        // Format File Size
+        function formatFileSize(bytes) {
+            if (!bytes || bytes === '') return 'N/A';
+            const kb = bytes / 1024;
+            if (kb < 1024) return `${kb.toFixed(1)} KB`;
+            return `${(kb / 1024).toFixed(2)} MB`;
+        }
+
+        // Filter Buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                displayClaims();
+            });
+        });
+
+        // Export Updated CSV
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const headers = Object.keys(claimsData[0]).filter(k => k !== 'localStatus');
+            headers.push('reviewed_status');
+            
+            let csv = headers.join(',') + '\n';
+            
+            claimsData.forEach(claim => {
+                const row = headers.map(header => {
+                    if (header === 'reviewed_status') {
+                        return claim.localStatus;
+                    }
+                    let value = claim[header] || '';
+                    // Escape quotes and wrap in quotes if contains comma
+                    if (value.includes(',') || value.includes('"')) {
+                        value = '"' + value.replace(/"/g, '""') + '"';
+                    }
+                    return value;
+                });
+                csv += row.join(',') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `winning_claims_reviewed_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        });
+
+        // Image Modal Functions
+        function openModal(imageUrl) {
+            document.getElementById('modalImage').src = imageUrl;
+            document.getElementById('imageModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        function openImageInNew(url) {
+            window.open(url, '_blank');
+        }
+
+        function downloadImage(url, claimRef) {
+            fetch(url)
+                .then(res => res.blob())
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `bingo_claim_${claimRef}.png`;
+                    a.click();
+                })
+                .catch(err => alert('Failed to download image'));
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>
+

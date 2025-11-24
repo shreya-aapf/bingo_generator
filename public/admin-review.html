@@ -212,12 +212,74 @@
         .claim-card.approved {
             border-color: var(--success-color);
             background: #f0fdf4;
+            animation: approveGlow 0.5s ease;
+        }
+
+        @keyframes approveGlow {
+            0%, 100% {
+                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+            }
         }
 
         .claim-card.rejected {
             border-color: var(--error-color);
             background: #fef2f2;
-            opacity: 0.7;
+        }
+
+        .claim-card.whoosh-away {
+            animation: whooshAway 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            pointer-events: none; /* Prevent interaction during animation */
+        }
+
+        @keyframes whooshAway {
+            0% {
+                transform: translateX(0) scale(1) rotate(0deg);
+                opacity: 1;
+                filter: blur(0px);
+            }
+            30% {
+                transform: translateX(80px) scale(0.95) rotate(3deg);
+                opacity: 0.8;
+                filter: blur(0px);
+            }
+            60% {
+                transform: translateX(200px) scale(0.7) rotate(8deg);
+                opacity: 0.4;
+                filter: blur(2px);
+            }
+            100% {
+                transform: translateX(150vw) scale(0.3) rotate(20deg);
+                opacity: 0;
+                filter: blur(5px);
+                height: 0;
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        /* Shake animation for reject button */
+        @keyframes rejectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .btn-reject.clicked {
+            animation: rejectShake 0.3s ease;
+        }
+
+        /* Pop animation for approve button */
+        @keyframes approvePopBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-approve.clicked {
+            animation: approvePopBounce 0.3s ease;
         }
 
         .claim-image-section {
@@ -635,10 +697,10 @@
                     </div>
                     
                     <div class="action-buttons">
-                        <button class="btn-action btn-approve" onclick="updateStatus(${index}, 'approved')" ${claim.localStatus === 'approved' ? 'disabled' : ''}>
+                        <button class="btn-action btn-approve" onclick="updateStatus(${index}, 'approved', this)" ${claim.localStatus === 'approved' ? 'disabled' : ''}>
                             ✓ Approve
                         </button>
-                        <button class="btn-action btn-reject" onclick="updateStatus(${index}, 'rejected')" ${claim.localStatus === 'rejected' ? 'disabled' : ''}>
+                        <button class="btn-action btn-reject" onclick="updateStatus(${index}, 'rejected', this)" ${claim.localStatus === 'rejected' ? 'disabled' : ''}>
                             ✕ Reject
                         </button>
                     </div>
@@ -649,8 +711,54 @@
         }
 
         // Update Status
-        function updateStatus(index, status) {
+        function updateStatus(index, status, buttonElement) {
+            const oldStatus = claimsData[index].localStatus;
+            
+            // If rejecting, prompt for reason
+            if (status === 'rejected' && oldStatus !== 'rejected') {
+                const reason = prompt('Please provide a reason for rejection (optional):');
+                
+                // If user cancels, don't proceed with rejection
+                if (reason === null) {
+                    return;
+                }
+                
+                // Store the rejection reason
+                claimsData[index].rejection_reason = reason.trim() || 'No reason provided';
+            }
+            
             claimsData[index].localStatus = status;
+            
+            // Add button feedback
+            if (buttonElement) {
+                buttonElement.classList.add('clicked');
+                setTimeout(() => buttonElement.classList.remove('clicked'), 300);
+            }
+            
+            // If rejecting, add whoosh animation and hide
+            if (status === 'rejected' && oldStatus !== 'rejected') {
+                const claimCards = document.querySelectorAll('.claim-card');
+                const cardElement = Array.from(claimCards).find(card => {
+                    const claimId = card.querySelector('.claim-id').textContent;
+                    return claimId === (claimsData[index].claim_ref || claimsData[index].id);
+                });
+                
+                if (cardElement) {
+                    // Add whoosh animation
+                    cardElement.classList.add('whoosh-away');
+                    
+                    // Wait for animation to complete, then hide and re-render
+                    setTimeout(() => {
+                        cardElement.style.display = 'none';
+                        displayClaims();
+                        updateStats();
+                    }, 650);
+                    
+                    updateStats(); // Update stats immediately
+                    return; // Don't re-render yet
+                }
+            }
+            
             displayClaims();
             updateStats();
         }
@@ -688,8 +796,14 @@
 
         // Export Updated CSV
         document.getElementById('exportBtn').addEventListener('click', function() {
-            const headers = Object.keys(claimsData[0]).filter(k => k !== 'localStatus');
+            if (claimsData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+            
+            const headers = Object.keys(claimsData[0]).filter(k => k !== 'localStatus' && k !== 'rejection_reason');
             headers.push('reviewed_status');
+            headers.push('rejection_reason');
             
             let csv = headers.join(',') + '\n';
             
@@ -697,6 +811,9 @@
                 const row = headers.map(header => {
                     if (header === 'reviewed_status') {
                         return claim.localStatus;
+                    }
+                    if (header === 'rejection_reason') {
+                        return claim.rejection_reason || '';
                     }
                     let value = claim[header] || '';
                     // Escape quotes and wrap in quotes if contains comma
